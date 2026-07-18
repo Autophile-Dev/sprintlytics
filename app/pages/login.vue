@@ -344,15 +344,7 @@
         </div>
       </div>
     </div>
-    <!-- Reusable Popup Alert Modal -->
-    <PopupAlert
-      :show="modalShow"
-      :type="modalType"
-      :title="modalTitle"
-      :message="modalMessage"
-      :autoClose="5000"
-      @close="modalShow = false"
-    />
+    <!-- AppModal is mounted globally in app.vue via useModal() -->
   </div>
 </template>
 
@@ -370,11 +362,8 @@ const authState = ref('login');
 const loading = ref(false);
 const showPassword = ref(false);
 
-// Modal state refs for reusable PopupAlert modal
-const modalShow = ref(false);
-const modalType = ref('info');
-const modalTitle = ref('');
-const modalMessage = ref('');
+// Global modal — powered by useModal composable (AppModal in app.vue)
+const modal = useModal();
 
 // Form Bindings
 const loginData = reactive({
@@ -410,18 +399,20 @@ const clearError = (form, field) => {
   if (form === 'reset') resetErrors[field] = '';
 };
 
-// Helper to show Popup Modal alert
+// Helper to show modal alert via global composable
 const showAlert = (message, type = 'error', title = '') => {
-  modalMessage.value = message;
-  modalType.value = type;
-  modalTitle.value = title || (type === 'success' ? 'Success' : 'Error');
-  modalShow.value = true;
+  modal.show({
+    type,
+    title: title || (type === 'success' ? 'Success' : 'Error'),
+    message,
+    autoClose: type === 'error' ? 0 : 4000,
+  });
 };
 
 // Switch auth screen state with clean reset
 const switchState = (newState) => {
   authState.value = newState;
-  modalShow.value = false;
+  modal.close();
   showPassword.value = false;
   resetCode.value = '';
   newPassword.value = '';
@@ -508,10 +499,7 @@ const handleLogin = async () => {
     });
 
     if (response && response.success) {
-      showAlert('Login successful! Redirecting...', 'success', 'Welcome Back');
-      setTimeout(() => {
-        router.push('/');
-      }, 1500);
+      router.push('/');
     }
   } catch (error) {
     const errorMsg = error.data?.message || 'Invalid email or password.';

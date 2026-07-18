@@ -1,6 +1,13 @@
+import dns from "dns";
 import fs from "fs";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+
+// Force IPv4-first DNS to fix MongoDB Atlas SRV lookups on Node.js v17+
+dns.setDefaultResultOrder("ipv4first");
+// Force Google's public DNS to bypass ISP/router DNS issues
+dns.setServers(["8.8.8.8", "8.8.4.4", "1.1.1.1"]);
+
 
 // Load .env manually
 const envPath = "./.env";
@@ -30,7 +37,11 @@ async function seed() {
   }
 
   console.log("🔗 Connecting to MongoDB...");
-  await mongoose.connect(mongoUri);
+  await mongoose.connect(mongoUri, {
+    family: 4,
+    serverSelectionTimeoutMS: 15000,
+    connectTimeoutMS: 15000,
+  });
   console.log("✅ Connected!\n");
 
   try {
