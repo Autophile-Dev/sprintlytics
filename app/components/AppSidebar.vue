@@ -21,23 +21,6 @@
       </Transition>
     </div>
 
-    <!-- ── Toggle Button ── -->
-    <button
-      class="sidebar__toggle"
-      @click="isCollapsed = !isCollapsed"
-      :aria-label="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-    >
-      <svg
-        class="toggle-icon"
-        :class="{ 'toggle-icon--flipped': isCollapsed }"
-        width="14" height="14" viewBox="0 0 24 24"
-        fill="none" stroke="currentColor"
-        stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-      >
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
-    </button>
-
     <!-- ── Scrollable Nav ── -->
     <nav class="sidebar__nav" role="navigation">
 
@@ -249,23 +232,6 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 
-/* ── Variables ── */
-:root {
-  --sidebar-width: 248px;
-  --sidebar-collapsed-width: 68px;
-  --primary: #059669;
-  --primary-dark: #065F46;
-  --primary-light: #ECFDF5;
-  --primary-mid: #D1FAE5;
-  --text-main: #111827;
-  --text-muted: #6B7280;
-  --border: #E5E7EB;
-  --bg: #ffffff;
-  --hover-bg: #F9FAFB;
-  --radius: 10px;
-  --transition: 0.26s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 /* ── Sidebar Shell ── */
 .sidebar {
   position: fixed;
@@ -274,12 +240,10 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
   bottom: 0;
   width: var(--sidebar-width);
   background: var(--bg);
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   z-index: 100;
   transition: width var(--transition);
-  overflow: hidden;
   font-family: 'Open Sans', sans-serif;
   box-shadow: 4px 0 24px -8px rgba(0, 0, 0, 0.06);
   will-change: width;
@@ -292,25 +256,25 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
 /* ── Logo ── */
 .sidebar__logo {
   padding: 1rem;
-  min-height: 80px;
+  min-height: 20px;
   display: flex;
   align-items: center;
   overflow: hidden;
-  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 .sidebar__logo-wide {
- 
+  
   object-fit: contain;
   object-position: left;
-  width: 150px;
+ width: 127px;
 }
 
 
+
 .sidebar__logo-icon {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
   border-radius: 8px;
 }
@@ -322,43 +286,6 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
 }
 .logo-fade-enter-from { opacity: 0; transform: scale(0.85); }
 .logo-fade-leave-to  { opacity: 0; transform: scale(0.85); }
-
-/* ── Toggle button ── */
-.sidebar__toggle {
-  position: absolute;
-  top: 26px; /* Center-aligned with the 80px high logo box */
-  right: -12px;
-  width: 24px;
-  height: 24px;
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  transition: all var(--transition);
-  color: var(--text-muted);
-  padding: 0;
-}
-
-.sidebar__toggle:hover {
-  background: var(--primary-light);
-  border-color: var(--primary);
-  color: var(--primary);
-  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.15);
-}
-
-.toggle-icon {
-  transition: transform var(--transition);
-  flex-shrink: 0;
-}
-
-.toggle-icon--flipped {
-  transform: rotate(180deg);
-}
 
 /* ── Nav ── */
 .sidebar__nav {
@@ -416,8 +343,8 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
   padding: 0.75rem 0.875rem;
   border-radius: 14px;
   cursor: pointer;
-  background: transparent;
-  border: 1px solid #fee2e2;
+  background: #fef2f2;
+  border: none;
   color: #ef4444;
   font-weight: 600;
   font-size: 0.9rem;
@@ -428,8 +355,8 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
 }
 
 .sidebar__logout-btn:hover {
-  background: #fef2f2;
-  border-color: #fca5a5;
+  background: #fee2e2;
+  color: #dc2626;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.08);
 }
 
@@ -439,12 +366,11 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border-color: transparent;
   margin: 0 auto;
 }
 
 .sidebar__logout-btn--collapsed:hover {
-  border-color: #fee2e2;
+  background: #fee2e2;
 }
 
 .logout-icon {

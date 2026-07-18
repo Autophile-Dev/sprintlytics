@@ -349,6 +349,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  layout: false
+});
+
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 

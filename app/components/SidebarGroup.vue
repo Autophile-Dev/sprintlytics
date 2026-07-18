@@ -47,20 +47,21 @@
     <div
       v-if="!collapsed"
       class="sidebar-group__submenu-wrapper"
-      :style="submenuStyle"
-      ref="submenuRef"
+      :class="{ 'sidebar-group__submenu-wrapper--open': isOpen }"
     >
-      <ul class="sidebar-group__submenu">
-        <!-- Vertical connector line decoration to match design in the image -->
-        <div class="sidebar-group__tree-line"></div>
-        <slot name="children" />
-      </ul>
+      <div class="sidebar-group__submenu-inner">
+        <ul class="sidebar-group__submenu">
+          <!-- Vertical connector line decoration to match design in the image -->
+          <div class="sidebar-group__tree-line"></div>
+          <slot name="children" />
+        </ul>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -84,24 +85,6 @@ const toggle = () => {
   if (props.collapsed) return;
   isOpen.value = !isOpen.value;
 };
-
-const submenuRef = ref(null);
-const submenuStyle = computed(() => {
-  if (isOpen.value) {
-    return {
-      maxHeight: '400px',
-      opacity: '1',
-      visibility: 'visible',
-      marginTop: '4px'
-    };
-  }
-  return {
-    maxHeight: '0',
-    opacity: '0',
-    visibility: 'hidden',
-    marginTop: '0'
-  };
-});
 </script>
 
 <style scoped>
@@ -166,11 +149,24 @@ const submenuStyle = computed(() => {
   color: #059669;
 }
 
-/* Submenu Wrapper with slide animation */
+/* Submenu Wrapper with modern CSS Grid auto-height transition */
 .sidebar-group__submenu-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-top 0.3s ease;
   overflow: hidden;
-  transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, visibility 0.2s ease, margin-top 0.2s ease;
-  will-change: max-height, opacity;
+  opacity: 0;
+  margin-top: 0;
+}
+
+.sidebar-group__submenu-wrapper--open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: 4px;
+}
+
+.sidebar-group__submenu-inner {
+  min-height: 0;
 }
 
 .sidebar-group__submenu {

@@ -53,8 +53,9 @@ defineProps({
 }
 
 .sidebar-subitem--active {
-  background-color: rgba(5, 150, 105, 0.08) !important;
-  color: #059669 !important;
+  background: linear-gradient(135deg, #059669 0%, #065F46 100%) !important;
+  color: #ffffff !important;
   font-weight: 600;
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.15);
 }
 </style>

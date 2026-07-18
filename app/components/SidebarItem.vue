@@ -70,20 +70,14 @@ defineProps({
 }
 
 .sidebar-item--active {
-  background-color: rgba(5, 150, 105, 0.08) !important;
-  color: #059669 !important;
+  background: linear-gradient(135deg, #059669 0%, #065F46 100%) !important;
+  color: #ffffff !important;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
 }
 
 .sidebar-item--active::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 20%;
-  bottom: 20%;
-  width: 3px;
-  background-color: #059669;
-  border-radius: 0 4px 4px 0;
+  display: none;
 }
 
 .sidebar-item__icon {
@@ -95,7 +89,7 @@ defineProps({
 }
 
 .sidebar-item--active .sidebar-item__icon {
-  color: #059669;
+  color: #ffffff !important;
 }
 
 .sidebar-item__label {
