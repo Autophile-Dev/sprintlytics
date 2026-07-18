@@ -6,7 +6,7 @@
  * Requires: npm install mongoose
  */
 
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 /* ---------- embedded sub-schemas ---------- */
@@ -163,6 +163,5 @@ const ProjectPerformanceSchema = new Schema(
   { collection: "project_performance", timestamps: true },
 );
 
-module.exports =
-  mongoose.models.ProjectPerformance ||
+export default mongoose.models.ProjectPerformance ||
   mongoose.model("ProjectPerformance", ProjectPerformanceSchema);

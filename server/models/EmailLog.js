@@ -9,7 +9,7 @@
  * Requires: npm install mongoose
  */
 
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const EmailLogSchema = new Schema(
@@ -31,5 +31,4 @@ const EmailLogSchema = new Schema(
   { collection: "email_logs", timestamps: true },
 );
 
-module.exports =
-  mongoose.models.EmailLog || mongoose.model("EmailLog", EmailLogSchema);
+export default mongoose.models.EmailLog || mongoose.model("EmailLog", EmailLogSchema);

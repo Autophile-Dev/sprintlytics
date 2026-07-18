@@ -36,12 +36,17 @@ export async function connectDB() {
   }
 
   try {
-    const conn = await mongoose.connect(uri);
+    const conn = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 15000,
+      connectTimeoutMS: 15000,
+      socketTimeoutMS: 30000,
+      family: 4, // Force IPv4, avoids IPv6 DNS issues
+    });
     cachedConnection = conn.connection;
     console.log("[MongoDB] Connected successfully.");
     return cachedConnection;
   } catch (error) {
-    console.error("[MongoDB] Connection failed:", error);
+    console.error("[MongoDB] Connection failed:", error.message);
     throw error;
   }
 }

@@ -1,112 +1,15 @@
 <template>
   <div class="login-layout">
-    <!-- Left Branding and Visuals Pane -->
-    <div class="branding-pane">
-      <!-- Drifting glow blobs representing growth & success -->
-      <div class="glow-blob blob-1"></div>
-      <div class="glow-blob blob-2"></div>
-      <div class="glow-blob blob-3"></div>
-      
-      <!-- Grid pattern overlay -->
-      <div class="grid-overlay"></div>
-      
-      <div class="branding-content">
-        <div class="branding-header">
-          <img src="/wide-logo.png" alt="Sprintlytics Logo" class="branding-logo" />
-          <a href="#" class="back-link">
-            <span>Back to Website</span>
-            <svg class="arrow-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 12L9 8L5 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </a>
-        </div>
-        
-        <div class="branding-body">
-          <h1 class="branding-title">
-            Track Metrics.<br />
-            <span class="gradient-text-accent">Predict Risks.</span><br />
-            <span class="gradient-text-primary">Ship Faster.</span>
-          </h1>
-          <p class="branding-description">
-            Sprintlytics converts Jira and sprint data into automated health scores, key metrics, and actionable analytics. Get real-time visibility into sprint progress, team utilization, and project risks.
-          </p>
-        </div>
-        
-        <!-- Floating Metrics Cards (Motion Showcase) -->
-        <div class="metrics-dashboard">
-          <!-- Card 1: Health Score -->
-          <div class="metric-card card-health">
-            <div class="card-inner">
-              <div class="metric-icon-wrapper ring-container">
-                <svg width="42" height="42" viewBox="0 0 36 36" class="circular-chart">
-                  <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path class="circle" stroke-dasharray="94, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <text x="18" y="21" class="percentage">94%</text>
-                </svg>
-              </div>
-              <div class="metric-info">
-                <h3>Sprint Health</h3>
-                <p>Optimal productivity</p>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Card 2: Team Velocity -->
-          <div class="metric-card card-velocity">
-            <div class="card-inner">
-              <div class="metric-icon-wrapper chart-container">
-                <div class="bar-chart">
-                  <div class="bar bar-1"></div>
-                  <div class="bar bar-2"></div>
-                  <div class="bar bar-3"></div>
-                  <div class="bar bar-4"></div>
-                </div>
-              </div>
-              <div class="metric-info">
-                <h3>Team Velocity</h3>
-                <p class="positive">+12% vs last sprint</p>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Card 3: Active Risks -->
-          <div class="metric-card card-risks">
-            <div class="card-inner">
-              <div class="metric-icon-wrapper pulse-container">
-                <span class="pulse-number">0</span>
-                <span class="pulse-ring"></span>
-              </div>
-              <div class="metric-info">
-                <h3>Critical Risks</h3>
-                <p>All projects on track</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Login Card Pane -->
+    <!-- Centered Login Card Pane -->
     <div class="form-pane">
       <div class="login-card-wrapper">
         <div class="login-card">
-          <!-- Mobile logo (only displays when left branding pane is hidden) -->
-          <div class="mobile-logo-container">
-            <img src="/wide-logo.png" alt="Sprintlytics Logo" class="mobile-logo" />
+          <!-- Logo at the top of the login form -->
+          <div class="logo-container">
+            <img src="/wide-logo.png" alt="Sprintlytics Logo" class="branding-logo" />
           </div>
 
-          <!-- Alert banner for errors/success messages -->
-          <Transition name="fade">
-            <div v-if="alertMessage" :class="['alert-banner', alertType]">
-              <span class="alert-icon">
-                <svg v-if="alertType === 'error'" width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                  <path v-else width="18" height="18" fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-              </span>
-              <span class="alert-text">{{ alertMessage }}</span>
-            </div>
-          </Transition>
+
 
           <!-- State 1: LOGIN -->
           <div v-if="authState === 'login'" class="form-content-wrapper">
@@ -115,11 +18,11 @@
               <p class="form-subtitle">Log in to start optimizing your sprint analytics.</p>
             </div>
 
-            <form @submit.prevent="handleLogin" class="login-form">
+            <form @submit.prevent="handleLogin" class="login-form" novalidate>
               <!-- Email Address -->
               <div class="form-group">
                 <label for="login-email">Email</label>
-                <div class="input-wrapper">
+                <div class="input-wrapper" :class="{ 'input-wrapper-error': loginErrors.email }">
                   <span class="input-icon">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M2.5 5.5L10 11.25L17.5 5.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -130,17 +33,19 @@
                     type="email"
                     id="login-email"
                     v-model="loginData.email"
+                    @input="clearError('login', 'email')"
                     placeholder="Input your email"
                     required
                     class="form-input"
                   />
                 </div>
+                <span v-if="loginErrors.email" class="field-error">{{ loginErrors.email }}</span>
               </div>
 
               <!-- Password -->
               <div class="form-group">
                 <label for="login-password">Password</label>
-                <div class="input-wrapper">
+                <div class="input-wrapper" :class="{ 'input-wrapper-error': loginErrors.password }">
                   <span class="input-icon">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="4.16663" y="9.16669" width="11.6667" height="8.33333" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -151,6 +56,7 @@
                     :type="showPassword ? 'text' : 'password'"
                     id="login-password"
                     v-model="loginData.password"
+                    @input="clearError('login', 'password')"
                     placeholder="Input your password"
                     required
                     class="form-input password-input"
@@ -166,6 +72,7 @@
                     </svg>
                   </button>
                 </div>
+                <span v-if="loginErrors.password" class="field-error">{{ loginErrors.password }}</span>
               </div>
 
               <!-- Options (Remember me & Forgot Password) -->
@@ -181,29 +88,10 @@
               <!-- Action Buttons -->
               <button type="submit" class="submit-btn" :disabled="loading">
                 <span v-if="loading" class="btn-spinner"></span>
-                <span>Login</span>
+                <span v-else>Login</span>
               </button>
 
-              <!-- Divider -->
-              <div class="divider">
-                <span>Or continue with:</span>
-              </div>
-
-              <!-- Google Social Login -->
-              <button type="button" @click="handleGoogleSignIn" class="google-btn">
-                <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-                </svg>
-                <span>Continue with Google</span>
-              </button>
             </form>
-
-            <div class="form-footer">
-              <p>Don't have an account? <a href="#" @click.prevent="switchState('register')" class="footer-link">Sign up here</a></p>
-            </div>
           </div>
 
           <!-- State 2: REGISTER -->
@@ -213,11 +101,11 @@
               <p class="form-subtitle">Register to unlock automated sprint metrics & insights.</p>
             </div>
 
-            <form @submit.prevent="handleRegister" class="login-form">
+            <form @submit.prevent="handleRegister" class="login-form" novalidate>
               <!-- Email Address -->
               <div class="form-group">
                 <label for="reg-email">Email</label>
-                <div class="input-wrapper">
+                <div class="input-wrapper" :class="{ 'input-wrapper-error': registerErrors.email }">
                   <span class="input-icon">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M2.5 5.5L10 11.25L17.5 5.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -228,17 +116,19 @@
                     type="email"
                     id="reg-email"
                     v-model="registerData.email"
+                    @input="clearError('register', 'email')"
                     placeholder="Input your email"
                     required
                     class="form-input"
                   />
                 </div>
+                <span v-if="registerErrors.email" class="field-error">{{ registerErrors.email }}</span>
               </div>
 
               <!-- Password -->
               <div class="form-group">
                 <label for="reg-password">Password</label>
-                <div class="input-wrapper">
+                <div class="input-wrapper" :class="{ 'input-wrapper-error': registerErrors.password }">
                   <span class="input-icon">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="4.16663" y="9.16669" width="11.6667" height="8.33333" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -249,6 +139,7 @@
                     :type="showPassword ? 'text' : 'password'"
                     id="reg-password"
                     v-model="registerData.password"
+                    @input="clearError('register', 'password')"
                     placeholder="Create a strong password"
                     required
                     class="form-input"
@@ -264,61 +155,42 @@
                     </svg>
                   </button>
                 </div>
-                <span class="password-tip">At least 8 characters with 1 uppercase, 1 lowercase, 1 number and 1 special symbol.</span>
-              </div>
+                <span v-if="registerErrors.password" class="field-error">{{ registerErrors.password }}</span>
 
-              <!-- Action Button -->
-              <button type="submit" class="submit-btn" :disabled="loading">
-                <span v-if="loading" class="btn-spinner"></span>
-                <span>Sign Up</span>
-              </button>
-            </form>
-
-            <div class="form-footer">
-              <p>Already have an account? <a href="#" @click.prevent="switchState('login')" class="footer-link">Log in here</a></p>
-            </div>
-          </div>
-
-          <!-- State 3: VERIFY OTP -->
-          <div v-else-if="authState === 'verify-otp'" class="form-content-wrapper">
-            <div class="form-header">
-              <h2 class="form-title">Verify Email</h2>
-              <p class="form-subtitle text-center">We've sent a 6-digit verification code to <span class="highlight-email">{{ targetEmail }}</span>. Enter it below to activate your account.</p>
-            </div>
-
-            <form @submit.prevent="handleVerifyOtp" class="login-form">
-              <!-- OTP Code Input -->
-              <div class="form-group">
-                <label for="otp-code">Verification Code</label>
-                <div class="otp-input-container">
-                  <input
-                    type="text"
-                    id="otp-code"
-                    v-model="otpCode"
-                    placeholder="Enter 6-digit code"
-                    maxlength="6"
-                    required
-                    pattern="[0-9]{6}"
-                    class="form-input otp-code-input"
-                    autocomplete="one-time-code"
-                  />
+                <!-- Password Complexity Checklist (Live feedback) -->
+                <div class="password-requirements" v-if="registerData.password">
+                  <div class="requirement-item" :class="{ met: passwordReqs.length }">
+                    <span class="req-dot"></span>
+                    <span>8+ characters</span>
+                  </div>
+                  <div class="requirement-item" :class="{ met: passwordReqs.lowercase }">
+                    <span class="req-dot"></span>
+                    <span>1 lowercase letter</span>
+                  </div>
+                  <div class="requirement-item" :class="{ met: passwordReqs.uppercase }">
+                    <span class="req-dot"></span>
+                    <span>1 uppercase letter</span>
+                  </div>
+                  <div class="requirement-item" :class="{ met: passwordReqs.number }">
+                    <span class="req-dot"></span>
+                    <span>1 number</span>
+                  </div>
+                  <div class="requirement-item" :class="{ met: passwordReqs.special }">
+                    <span class="req-dot"></span>
+                    <span>1 special symbol</span>
+                  </div>
                 </div>
               </div>
 
               <!-- Action Button -->
               <button type="submit" class="submit-btn" :disabled="loading">
                 <span v-if="loading" class="btn-spinner"></span>
-                <span>Verify Code</span>
+                <span v-else>Sign Up</span>
               </button>
             </form>
 
             <div class="form-footer">
-              <p><a href="#" @click.prevent="switchState('login')" class="footer-link flex-link">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19 12H5M5 12l7 7M5 12l7-7" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span>Back to Login</span>
-              </a></p>
+              <p>Already have an account? <a href="#" @click.prevent="switchState('login')" class="footer-link">Log in here</a></p>
             </div>
           </div>
 
@@ -329,11 +201,11 @@
               <p class="form-subtitle">No worries. Enter your registered email address and we'll send you a password reset code.</p>
             </div>
 
-            <form @submit.prevent="handleForgotPassword" class="login-form">
+            <form @submit.prevent="handleForgotPassword" class="login-form" novalidate>
               <!-- Email Address -->
               <div class="form-group">
                 <label for="forgot-email">Email</label>
-                <div class="input-wrapper">
+                <div class="input-wrapper" :class="{ 'input-wrapper-error': forgotErrors.email }">
                   <span class="input-icon">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M2.5 5.5L10 11.25L17.5 5.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -344,17 +216,19 @@
                     type="email"
                     id="forgot-email"
                     v-model="forgotEmail"
+                    @input="clearError('forgot', 'email')"
                     placeholder="Input your email"
                     required
                     class="form-input"
                   />
                 </div>
+                <span v-if="forgotErrors.email" class="field-error">{{ forgotErrors.email }}</span>
               </div>
 
               <!-- Action Button -->
               <button type="submit" class="submit-btn" :disabled="loading">
                 <span v-if="loading" class="btn-spinner"></span>
-                <span>Send Reset Code</span>
+                <span v-else>Send Reset Code</span>
               </button>
             </form>
 
@@ -375,7 +249,7 @@
               <p class="form-subtitle">Enter the 6-digit reset code sent to your email and your new password.</p>
             </div>
 
-            <form @submit.prevent="handleResetPassword" class="login-form">
+            <form @submit.prevent="handleResetPassword" class="login-form" novalidate>
               <!-- OTP Code Input -->
               <div class="form-group">
                 <label for="reset-code">Reset Code</label>
@@ -383,18 +257,21 @@
                   type="text"
                   id="reset-code"
                   v-model="resetCode"
+                  @input="clearError('reset', 'code')"
                   placeholder="6-digit reset code"
                   maxlength="6"
                   required
                   pattern="[0-9]{6}"
                   class="form-input text-center"
+                  :class="{ 'otp-input-error': resetErrors.code }"
                 />
+                <span v-if="resetErrors.code" class="field-error text-center">{{ resetErrors.code }}</span>
               </div>
 
               <!-- New Password -->
               <div class="form-group">
                 <label for="reset-new-password">New Password</label>
-                <div class="input-wrapper">
+                <div class="input-wrapper" :class="{ 'input-wrapper-error': resetErrors.password }">
                   <span class="input-icon">
                     <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="4.16663" y="9.16669" width="11.6667" height="8.33333" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -405,6 +282,7 @@
                     :type="showPassword ? 'text' : 'password'"
                     id="reset-new-password"
                     v-model="newPassword"
+                    @input="clearError('reset', 'password')"
                     placeholder="Enter new password"
                     required
                     class="form-input"
@@ -420,13 +298,37 @@
                     </svg>
                   </button>
                 </div>
-                <span class="password-tip">Must contain 8+ characters (uppercase, lowercase, number, special).</span>
+                <span v-if="resetErrors.password" class="field-error">{{ resetErrors.password }}</span>
+
+                <!-- Password Complexity Checklist (Live feedback) -->
+                <div class="password-requirements" v-if="newPassword">
+                  <div class="requirement-item" :class="{ met: resetPasswordReqs.length }">
+                    <span class="req-dot"></span>
+                    <span>8+ characters</span>
+                  </div>
+                  <div class="requirement-item" :class="{ met: resetPasswordReqs.lowercase }">
+                    <span class="req-dot"></span>
+                    <span>1 lowercase letter</span>
+                  </div>
+                  <div class="requirement-item" :class="{ met: resetPasswordReqs.uppercase }">
+                    <span class="req-dot"></span>
+                    <span>1 uppercase letter</span>
+                  </div>
+                  <div class="requirement-item" :class="{ met: resetPasswordReqs.number }">
+                    <span class="req-dot"></span>
+                    <span>1 number</span>
+                  </div>
+                  <div class="requirement-item" :class="{ met: resetPasswordReqs.special }">
+                    <span class="req-dot"></span>
+                    <span>1 special symbol</span>
+                  </div>
+                </div>
               </div>
 
               <!-- Action Button -->
               <button type="submit" class="submit-btn" :disabled="loading">
                 <span v-if="loading" class="btn-spinner"></span>
-                <span>Update Password</span>
+                <span v-else>Update Password</span>
               </button>
             </form>
 
@@ -442,23 +344,37 @@
         </div>
       </div>
     </div>
+    <!-- Reusable Popup Alert Modal -->
+    <PopupAlert
+      :show="modalShow"
+      :type="modalType"
+      :title="modalTitle"
+      :message="modalMessage"
+      :autoClose="5000"
+      @close="modalShow = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+
+// Retrieve CSRF token cookie at the top level (violates composition API rules to call useCookie inside helper functions)
+const csrfCookie = useCookie('csrf_token');
 
 // Auth UI state: 'login' | 'register' | 'verify-otp' | 'forgot-password' | 'reset-password'
 const authState = ref('login');
 const loading = ref(false);
 const showPassword = ref(false);
 
-// Notification Alert System
-const alertMessage = ref('');
-const alertType = ref('error'); // 'error' | 'success'
+// Modal state refs for reusable PopupAlert modal
+const modalShow = ref(false);
+const modalType = ref('info');
+const modalTitle = ref('');
+const modalMessage = ref('');
 
 // Form Bindings
 const loginData = reactive({
@@ -472,44 +388,119 @@ const registerData = reactive({
   password: ''
 });
 
-// Verification/Reset target email
+// Reset target email
 const targetEmail = ref('');
-
-// OTP Verification code
-const otpCode = ref('');
 
 // Forgot & Reset Passwords
 const forgotEmail = ref('');
 const resetCode = ref('');
 const newPassword = ref('');
 
-// Helper to flash notifications
-const showAlert = (message, type = 'error') => {
-  alertMessage.value = message;
-  alertType.value = type;
-  setTimeout(() => {
-    alertMessage.value = '';
-  }, 6000);
+// Validation Error States
+const loginErrors = reactive({ email: '', password: '' });
+const registerErrors = reactive({ email: '', password: '' });
+const forgotErrors = reactive({ email: '' });
+const resetErrors = reactive({ code: '', password: '' });
+
+// Clear specific field errors
+const clearError = (form, field) => {
+  if (form === 'login') loginErrors[field] = '';
+  if (form === 'register') registerErrors[field] = '';
+  if (form === 'forgot') forgotErrors[field] = '';
+  if (form === 'reset') resetErrors[field] = '';
+};
+
+// Helper to show Popup Modal alert
+const showAlert = (message, type = 'error', title = '') => {
+  modalMessage.value = message;
+  modalType.value = type;
+  modalTitle.value = title || (type === 'success' ? 'Success' : 'Error');
+  modalShow.value = true;
 };
 
 // Switch auth screen state with clean reset
 const switchState = (newState) => {
   authState.value = newState;
-  alertMessage.value = '';
+  modalShow.value = false;
   showPassword.value = false;
-  otpCode.value = '';
   resetCode.value = '';
   newPassword.value = '';
+  
+  // Clear error messages
+  loginErrors.email = '';
+  loginErrors.password = '';
+  registerErrors.email = '';
+  registerErrors.password = '';
+  forgotErrors.email = '';
+  resetErrors.code = '';
+  resetErrors.password = '';
 };
+
+// Local Validation Rules
+const validateEmail = (email) => {
+  if (!email) return 'Email is required.';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return 'Please enter a valid email address.';
+  return '';
+};
+
+const validatePassword = (password) => {
+  if (!password) return 'Password is required.';
+  if (password.length < 8) return 'Password must be at least 8 characters long.';
+  if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter.';
+  if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter.';
+  if (!/[0-9]/.test(password)) return 'Password must contain at least one number.';
+  if (!/[^A-Za-z0-9]/.test(password)) return 'Password must contain at least one special character.';
+  return '';
+};
+
+const validateCode = (code) => {
+  if (!code) return 'Verification code is required.';
+  if (!/^\d{6}$/.test(code)) return 'Verification code must be exactly 6 digits.';
+  return '';
+};
+
+// Computed properties for password requirement checks (real-time feedback)
+const passwordReqs = computed(() => {
+  const p = registerData.password || '';
+  return {
+    length: p.length >= 8,
+    lowercase: /[a-z]/.test(p),
+    uppercase: /[A-Z]/.test(p),
+    number: /[0-9]/.test(p),
+    special: /[^A-Za-z0-9]/.test(p)
+  };
+});
+
+const resetPasswordReqs = computed(() => {
+  const p = newPassword.value || '';
+  return {
+    length: p.length >= 8,
+    lowercase: /[a-z]/.test(p),
+    uppercase: /[A-Z]/.test(p),
+    number: /[0-9]/.test(p),
+    special: /[^A-Za-z0-9]/.test(p)
+  };
+});
 
 // State 1: Action Login
 const handleLogin = async () => {
+  loginErrors.email = validateEmail(loginData.email);
+  loginErrors.password = loginData.password ? '' : 'Password is required.';
+  
+  if (loginErrors.email || loginErrors.password) {
+    return;
+  }
+
   loading.value = true;
-  alertMessage.value = '';
   
   try {
+    const csrfToken = csrfCookie.value;
     const response = await $fetch('/api/auth/login', {
       method: 'POST',
+      headers: {
+        'x-csrf-token': csrfToken || ''
+      },
       body: {
         email: loginData.email,
         password: loginData.password
@@ -517,25 +508,14 @@ const handleLogin = async () => {
     });
 
     if (response && response.success) {
-      showAlert('Login successful! Redirecting...', 'success');
+      showAlert('Login successful! Redirecting...', 'success', 'Welcome Back');
       setTimeout(() => {
         router.push('/');
-      }, 1000);
+      }, 1500);
     }
   } catch (error) {
     const errorMsg = error.data?.message || 'Invalid email or password.';
-    const statusCode = error.statusCode;
-
-    // Handle Unverified email address
-    if (statusCode === 403) {
-      targetEmail.value = loginData.email;
-      showAlert(errorMsg, 'error');
-      setTimeout(() => {
-        switchState('verify-otp');
-      }, 2000);
-    } else {
-      showAlert(errorMsg, 'error');
-    }
+    showAlert(errorMsg, 'error', 'Login Failed');
   } finally {
     loading.value = false;
   }
@@ -543,12 +523,22 @@ const handleLogin = async () => {
 
 // State 2: Action Register
 const handleRegister = async () => {
+  registerErrors.email = validateEmail(registerData.email);
+  registerErrors.password = validatePassword(registerData.password);
+  
+  if (registerErrors.email || registerErrors.password) {
+    return;
+  }
+
   loading.value = true;
-  alertMessage.value = '';
 
   try {
+    const csrfToken = csrfCookie.value;
     const response = await $fetch('/api/auth/register', {
       method: 'POST',
+      headers: {
+        'x-csrf-token': csrfToken || ''
+      },
       body: {
         email: registerData.email,
         password: registerData.password
@@ -556,50 +546,18 @@ const handleRegister = async () => {
     });
 
     if (response && response.success) {
-      targetEmail.value = registerData.email;
-      showAlert(response.message || 'OTP Sent. Please verify your email.', 'success');
+      // Direct login notification modal
+      showAlert('Registration successful! You can now log in with your credentials.', 'success', 'Account Created');
+      
+      // Auto-fill register email to login screen and redirect after modal
+      loginData.email = registerData.email;
       setTimeout(() => {
-        switchState('verify-otp');
-      }, 2000);
+        switchState('login');
+      }, 2500);
     }
   } catch (error) {
     const errorMsg = error.data?.message || 'Registration failed. Try again.';
-    showAlert(errorMsg, 'error');
-  } finally {
-    loading.value = false;
-  }
-};
-
-// State 3: Action Verify OTP
-const handleVerifyOtp = async () => {
-  if (otpCode.value.length !== 6) {
-    showAlert('Please enter the full 6-digit code.');
-    return;
-  }
-
-  loading.value = true;
-  alertMessage.value = '';
-
-  try {
-    const response = await $fetch('/api/auth/verify-otp', {
-      method: 'POST',
-      body: {
-        email: targetEmail.value,
-        code: otpCode.value
-      }
-    });
-
-    if (response && response.success) {
-      showAlert(response.message || 'Email verified successfully!', 'success');
-      // Autofill verified email into login form
-      loginData.email = targetEmail.value;
-      setTimeout(() => {
-        switchState('login');
-      }, 2000);
-    }
-  } catch (error) {
-    const errorMsg = error.data?.message || 'Invalid or expired OTP.';
-    showAlert(errorMsg, 'error');
+    showAlert(errorMsg, 'error', 'Registration Failed');
   } finally {
     loading.value = false;
   }
@@ -607,12 +565,21 @@ const handleVerifyOtp = async () => {
 
 // State 4: Action Forgot Password
 const handleForgotPassword = async () => {
+  forgotErrors.email = validateEmail(forgotEmail.value);
+  
+  if (forgotErrors.email) {
+    return;
+  }
+
   loading.value = true;
-  alertMessage.value = '';
 
   try {
+    const csrfToken = csrfCookie.value;
     const response = await $fetch('/api/auth/forgot-password', {
       method: 'POST',
+      headers: {
+        'x-csrf-token': csrfToken || ''
+      },
       body: {
         email: forgotEmail.value
       }
@@ -620,14 +587,14 @@ const handleForgotPassword = async () => {
 
     if (response && response.success) {
       targetEmail.value = forgotEmail.value;
-      showAlert(response.message || 'Reset code sent to email.', 'success');
+      showAlert(response.message || 'Reset code sent to email.', 'success', 'Code Sent');
       setTimeout(() => {
         switchState('reset-password');
-      }, 2000);
+      }, 2500);
     }
   } catch (error) {
     const errorMsg = error.data?.message || 'Error requesting reset code.';
-    showAlert(errorMsg, 'error');
+    showAlert(errorMsg, 'error', 'Request Failed');
   } finally {
     loading.value = false;
   }
@@ -635,17 +602,22 @@ const handleForgotPassword = async () => {
 
 // State 5: Action Reset Password
 const handleResetPassword = async () => {
-  if (resetCode.value.length !== 6) {
-    showAlert('Please enter the full 6-digit code.');
+  resetErrors.code = validateCode(resetCode.value);
+  resetErrors.password = validatePassword(newPassword.value);
+  
+  if (resetErrors.code || resetErrors.password) {
     return;
   }
 
   loading.value = true;
-  alertMessage.value = '';
 
   try {
+    const csrfToken = csrfCookie.value;
     const response = await $fetch('/api/auth/reset-password', {
       method: 'POST',
+      headers: {
+        'x-csrf-token': csrfToken || ''
+      },
       body: {
         email: targetEmail.value,
         code: resetCode.value,
@@ -654,7 +626,7 @@ const handleResetPassword = async () => {
     });
 
     if (response && response.success) {
-      showAlert(response.message || 'Password reset successfully!', 'success');
+      showAlert(response.message || 'Password reset successfully!', 'success', 'Password Updated');
       loginData.email = targetEmail.value;
       setTimeout(() => {
         switchState('login');
@@ -662,7 +634,7 @@ const handleResetPassword = async () => {
     }
   } catch (error) {
     const errorMsg = error.data?.message || 'Reset password failed.';
-    showAlert(errorMsg, 'error');
+    showAlert(errorMsg, 'error', 'Reset Failed');
   } finally {
     loading.value = false;
   }
@@ -670,7 +642,7 @@ const handleResetPassword = async () => {
 
 // Google Mock Sign In Action
 const handleGoogleSignIn = () => {
-  showAlert('Google authentication integration is simulated for development.', 'success');
+  showAlert('Google authentication integration is simulated for development.', 'info', 'Development Mode');
 };
 </script>
 
@@ -693,347 +665,28 @@ const handleGoogleSignIn = () => {
 }
 
 .login-layout {
-  display: flex;
+  display: grid;
+  place-items: center;
   min-height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-  background-color: #F9FAFB;
+  width: 100%;
+  max-width: 100%;
+  background: #F9FAFB;
   font-family: 'Open Sans', sans-serif;
   color: #111827;
-}
-
-/* ----------------------------------------------------
-   LEFT BRANDING PANE STYLING
----------------------------------------------------- */
-.branding-pane {
-  position: relative;
-  width: 50%;
-  background: radial-gradient(circle at 10% 20%, #065F46 0%, #022c22 90%);
-  display: flex;
-  flex-direction: column;
-  padding: 3rem 4rem;
-  overflow: hidden;
-  color: #ffffff;
+  padding: 2.5rem 1.5rem;
   box-sizing: border-box;
-}
-
-/* Glowing Ambient Blobs (Motion) */
-.glow-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.35;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.blob-1 {
-  background-color: #059669;
-  width: 350px;
-  height: 350px;
-  top: -100px;
-  left: -50px;
-  animation: drift 15s ease-in-out infinite alternate;
-}
-
-.blob-2 {
-  background-color: #14B8A6;
-  width: 400px;
-  height: 400px;
-  bottom: -150px;
-  right: -50px;
-  animation: drift 20s ease-in-out infinite alternate-reverse;
-}
-
-.blob-3 {
-  background-color: #065F46;
-  width: 300px;
-  height: 300px;
-  top: 40%;
-  left: 30%;
-  animation: drift 18s ease-in-out infinite alternate;
-}
-
-@keyframes drift {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(30px, -40px) scale(1.15);
-  }
-  100% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-}
-
-/* Grid Overlay */
-.grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image: 
-    linear-gradient(rgba(20, 184, 166, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(20, 184, 166, 0.04) 1px, transparent 1px);
-  background-size: 50px 50px;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* Branding Header */
-.branding-content {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: space-between;
-}
-
-.branding-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.branding-logo {
-  height: 44px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-}
-
-.back-link {
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  transition: color 0.25s ease;
-}
-
-.back-link:hover {
-  color: #14B8A6;
-}
-
-.arrow-icon {
-  transform: rotate(180deg);
-  transition: transform 0.25s ease;
-}
-
-.back-link:hover .arrow-icon {
-  transform: rotate(180deg) translateX(4px);
-}
-
-/* Branding Body text */
-.branding-body {
-  margin-top: 2rem;
-  max-width: 90%;
-}
-
-.branding-title {
-  font-family: 'Tan Mon Cherie', 'Playfair Display', serif;
-  font-size: 3.2rem;
-  line-height: 1.15;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  margin-bottom: 1.5rem;
-}
-
-.gradient-text-accent {
-  background: linear-gradient(135deg, #14B8A6 0%, #ffffff 80%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.gradient-text-primary {
-  background: linear-gradient(135deg, #059669 0%, #14B8A6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.branding-description {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: rgba(243, 244, 246, 0.8);
-  font-weight: 300;
-}
-
-/* KPI Metrics Dashboard Showcase (Floating Motion) */
-.metrics-dashboard {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-  margin-top: 2rem;
-}
-
-.metric-card {
-  background: rgba(6, 95, 70, 0.35);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(20, 184, 166, 0.2);
-  border-radius: 20px;
-  padding: 1.25rem;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.metric-card:hover {
-  transform: translateY(-8px) scale(1.03);
-  border-color: rgba(20, 184, 166, 0.4);
-}
-
-.card-inner {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.metric-icon-wrapper {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.metric-info h3 {
-  font-size: 0.87rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0;
-}
-
-.metric-info p {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0.2rem 0 0 0;
-}
-
-/* Circular Chart animation */
-.circular-chart {
-  max-width: 42px;
-  max-height: 42px;
-}
-
-.circle-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.1);
-  stroke-width: 2.8;
-}
-
-.circle {
-  fill: none;
-  stroke: #14B8A6;
-  stroke-width: 2.8;
-  stroke-linecap: round;
-  transition: stroke-dasharray 0.35s;
-}
-
-.percentage {
-  fill: #ffffff;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  text-anchor: middle;
-}
-
-/* Mini Bar Chart */
-.bar-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 28px;
-  width: 32px;
-  padding-bottom: 2px;
-}
-
-.bar {
-  flex-grow: 1;
-  background-color: #059669;
-  border-radius: 2px;
-  width: 5px;
-  animation: barGrow 1.5s ease-in-out infinite alternate;
-}
-
-.bar-1 { height: 40%; animation-delay: 0.1s; }
-.bar-2 { height: 75%; animation-delay: 0.3s; background-color: #14B8A6; }
-.bar-3 { height: 55%; animation-delay: 0.2s; }
-.bar-4 { height: 95%; animation-delay: 0.4s; background-color: #14B8A6; }
-
-@keyframes barGrow {
-  0% { transform: scaleY(0.7); transform-origin: bottom; }
-  100% { transform: scaleY(1); transform-origin: bottom; }
-}
-
-.metric-info p.positive {
-  color: #14B8A6;
-  font-weight: 600;
-}
-
-/* Pulse Check indicator */
-.pulse-container {
-  position: relative;
-  width: 32px;
-  height: 32px;
-  background-color: rgba(5, 150, 105, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pulse-number {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #10B981;
-  z-index: 2;
-}
-
-.pulse-ring {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 2px solid #10B981;
-  border-radius: 50%;
-  animation: pulseAnim 2s infinite ease-out;
-  z-index: 1;
-}
-
-@keyframes pulseAnim {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  100% { transform: scale(1.6); opacity: 0; }
-}
-
-/* Assign staggered floating animations to cards */
-.card-health {
-  animation: floatCard 6s ease-in-out infinite;
-}
-
-.card-velocity {
-  animation: floatCard 7s ease-in-out infinite;
-  animation-delay: 1.5s;
-}
-
-.card-risks {
-  animation: floatCard 8s ease-in-out infinite;
-  animation-delay: 3s;
-}
-
-@keyframes floatCard {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(0.5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ----------------------------------------------------
-   RIGHT FORM PANE STYLING
+   CENTERED FORM PANE STYLING
 ---------------------------------------------------- */
 .form-pane {
-  width: 50%;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #F9FAFB;
-  padding: 2rem;
-  box-sizing: border-box;
 }
 
 .login-card-wrapper {
@@ -1044,24 +697,24 @@ const handleGoogleSignIn = () => {
 .login-card {
   background: #ffffff;
   border-radius: 40px;
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05), 0 15px 25px -10px rgba(0, 0, 0, 0.05);
-  border: 1px solid #F3F4F6;
-  padding: 3.5rem 3rem;
+box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  padding: 2.5rem 2.5rem;
   width: 100%;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
 }
 
-.mobile-logo-container {
-  display: none;
+.logo-container {
+  display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
-.mobile-logo {
-  height: 40px;
+.branding-logo {
+  height: 105px;
   object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(6, 95, 70, 0.03));
 }
 
 /* Header inside card */
@@ -1098,7 +751,7 @@ const handleGoogleSignIn = () => {
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
 .form-group {
@@ -1177,6 +830,72 @@ const handleGoogleSignIn = () => {
   color: #6B7280;
   line-height: 1.3;
   margin-top: 0.1rem;
+}
+
+/* Input Validation Error Styles */
+.input-wrapper-error .form-input {
+  border-color: #EF4444;
+}
+
+.input-wrapper-error .form-input:focus {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.otp-input-error {
+  border-color: #EF4444 !important;
+}
+
+.otp-input-error:focus {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+.field-error {
+  font-size: 0.8rem;
+  color: #EF4444;
+  margin-top: 1px;
+  font-weight: 500;
+  display: block;
+}
+
+/* Password Requirements Checklist */
+.password-requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+}
+
+.requirement-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: #9CA3AF;
+  transition: all 0.2s ease;
+}
+
+.requirement-item .req-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #D1D5DB;
+  transition: all 0.2s ease;
+}
+
+.requirement-item.met {
+  color: #059669;
+  font-weight: 500;
+}
+
+.requirement-item.met .req-dot {
+  background-color: #059669;
+  box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);
 }
 
 /* Options row */
@@ -1472,7 +1191,10 @@ const handleGoogleSignIn = () => {
 @media (max-width: 1024px) {
   .login-layout {
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
   }
   
   .branding-pane {
@@ -1522,6 +1244,28 @@ const handleGoogleSignIn = () => {
   }
   .login-card {
     padding: 2.5rem 2rem;
+  }
+}
+</style>
+
+<style>
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+@media (min-width: 1025px) {
+  html, body {
+    overflow: hidden !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  html, body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 }
 </style>

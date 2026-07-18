@@ -69,7 +69,13 @@ onMounted(async () => {
 const handleLogout = async () => {
   try {
     loading.value = true;
-    await $fetch('/api/auth/logout', { method: 'POST' });
+    const csrfToken = useCookie('csrf_token').value;
+    await $fetch('/api/auth/logout', { 
+      method: 'POST',
+      headers: {
+        'x-csrf-token': csrfToken || ''
+      }
+    });
     user.value = null;
     router.push('/login');
   } catch (error) {
