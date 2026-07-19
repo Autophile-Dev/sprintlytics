@@ -704,7 +704,7 @@ box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
 }
 
 .branding-logo {
-  height: 105px;
+  height: 75px;
   object-fit: contain;
   filter: drop-shadow(0 4px 8px rgba(6, 95, 70, 0.03));
 }

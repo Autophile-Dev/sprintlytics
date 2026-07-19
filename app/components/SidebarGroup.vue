@@ -73,8 +73,8 @@ const isOpen = ref(props.active);
 
 // Sync open state with active route if changed externally
 watch(() => props.active, (newVal) => {
-  if (newVal) isOpen.value = true;
-});
+  if (newVal && !props.collapsed) isOpen.value = true;
+}, { immediate: true });
 
 // Close submenu if sidebar collapses
 watch(() => props.collapsed, (newVal) => {
@@ -118,8 +118,22 @@ const toggle = () => {
   color: #059669;
 }
 
-.sidebar-group--active .sidebar-group__header {
-  color: #059669;
+.sidebar-group--active > .sidebar-group__header {
+  background: linear-gradient(135deg, #059669 0%, #065F46 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+
+.sidebar-group--active > .sidebar-group__header:hover {
+  background: linear-gradient(135deg, #047857 0%, #064E3B 100%) !important;
+  color: #ffffff !important;
+}
+
+.sidebar-group--active > .sidebar-group__header .sidebar-group__icon,
+.sidebar-group--active > .sidebar-group__header .sidebar-group__arrow,
+.sidebar-group--active > .sidebar-group__header .sidebar-group__label {
+  color: #ffffff !important;
 }
 
 .sidebar-group__icon {

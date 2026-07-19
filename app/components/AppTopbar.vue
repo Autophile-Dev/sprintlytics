@@ -190,6 +190,7 @@ onBeforeUnmount(() => {
   z-index: 90;
   font-family: 'Open Sans', sans-serif;
   box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
 }
 
 .topbar__left {

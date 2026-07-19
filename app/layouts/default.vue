@@ -80,9 +80,11 @@ const handleLogout = async () => {
 
 <style scoped>
 .app-layout {
-  min-height: 100vh;
+  height: 100vh;
+  width: 100%;
   background-color: #F9FAFB;
   display: flex;
+  overflow: hidden;
 }
 
 .main-container {
@@ -90,7 +92,9 @@ const handleLogout = async () => {
   margin-left: var(--sidebar-width); /* Default sidebar expanded width */
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   transition: margin-left var(--transition);
   min-width: 0;
 }
@@ -103,6 +107,7 @@ const handleLogout = async () => {
   flex: 1;
   padding: 2rem 2.5rem;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 @media (max-width: 768px) {

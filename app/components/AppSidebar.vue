@@ -44,10 +44,10 @@
           </SidebarItem>
         </li>
 
-        <!-- Sprint Analytics -->
+        <!-- Analytics -->
         <li>
           <SidebarGroup
-            label="Sprint Analytics"
+            label="Analytics"
             :collapsed="isCollapsed"
             :active="currentRoute.startsWith('/sprint')"
           >
@@ -60,6 +60,36 @@
               <SidebarSubItem label="Sprint Health"   route="/sprint/health"    :active="currentRoute === '/sprint/health'" />
               <SidebarSubItem label="Velocity Chart"  route="/sprint/velocity"  :active="currentRoute === '/sprint/velocity'" />
               <SidebarSubItem label="Burndown"        route="/sprint/burndown"  :active="currentRoute === '/sprint/burndown'" />
+            </template>
+          </SidebarGroup>
+        </li>
+
+        <!-- Projects Group (Dynamic Company Sub-tabs) -->
+        <li>
+          <SidebarGroup
+            label="Projects"
+            :collapsed="isCollapsed"
+            :active="currentRoute.startsWith('/projects')"
+          >
+            <template #icon>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+            </template>
+            <template #children>
+              <SidebarSubItem 
+                v-for="company in companies" 
+                :key="company" 
+                :label="company" 
+                :route="`/projects/${encodeURIComponent(company)}`" 
+                :active="currentRoute === `/projects/${encodeURIComponent(company)}` || currentRoute === `/projects/${company}`" 
+              />
+              <SidebarSubItem 
+                v-if="!companies.length" 
+                label="All Projects" 
+                route="/projects" 
+                :active="currentRoute === '/projects'" 
+              />
             </template>
           </SidebarGroup>
         </li>
@@ -211,7 +241,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 const props = defineProps({
@@ -223,6 +253,23 @@ const emit = defineEmits(['logout']);
 const { isCollapsed } = useSidebar();
 const route = useRoute();
 const currentRoute = computed(() => route.path);
+
+const companies = ref([]);
+
+const fetchCompanies = async () => {
+  try {
+    const res = await $fetch('/api/projects/companies');
+    if (res && res.success && Array.isArray(res.companies)) {
+      companies.value = res.companies;
+    }
+  } catch (err) {
+    console.error('Failed to fetch project companies for sidebar:', err);
+  }
+};
+
+onMounted(() => {
+  fetchCompanies();
+});
 
 const userName = computed(() => props.user?.email?.split('@')[0] || 'User');
 const userRole = computed(() => props.user?.roles?.[0] || 'Member');
@@ -293,12 +340,15 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0.75rem 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
-.sidebar__nav::-webkit-scrollbar { width: 4px; }
-.sidebar__nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.sidebar__nav::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+  width: 0;
+  height: 0;
+}
 
 .sidebar__list {
   list-style: none;

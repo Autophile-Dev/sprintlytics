@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-root">
     <NuxtRouteAnnouncer />
     <NuxtLayout>
       <NuxtPage />
@@ -41,12 +41,19 @@ const modal = useModal();
   --transition: 0.26s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html, body {
+html, body, #__nuxt {
   margin: 0 !important;
   padding: 0 !important;
   background-color: #F9FAFB;
   font-family: 'Open Sans', sans-serif;
   height: 100%;
   width: 100%;
+  overflow: hidden;
+}
+
+.app-root {
+  height: 100%;
+  width: 100%;
 }
 </style>
+
