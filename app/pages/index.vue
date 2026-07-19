@@ -203,11 +203,13 @@
             <div class="kpi-header-row">
               <div class="kpi-title-with-icon">
                 <div class="kpi-icon-badge orange">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="8" y="6" width="8" height="12" rx="4"/>
-                    <line x1="6" y1="12" x2="18" y2="12"/>
-                    <line x1="6" y1="9" x2="18" y2="9"/>
-                    <line x1="6" y1="15" x2="18" y2="15"/>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 2l1.5 1.5"/><path d="M14.5 3.5L16 2"/>
+                    <path d="M9 7.5A3 3 0 0 1 15 7.5V13a3 3 0 0 1-6 0V7.5z"/>
+                    <path d="M6 11H3"/><path d="M21 11h-3"/>
+                    <path d="M6 7L4 5"/><path d="M18 7l2-2"/>
+                    <path d="M6 17l-2 2"/><path d="M18 17l2 2"/>
+                    <line x1="12" y1="10" x2="12" y2="10.01"/>
                   </svg>
                 </div>
                 <span class="kpi-name">Open Bugs</span>
@@ -399,60 +401,48 @@
         <div class="section-header">
           <div>
             <h2 class="section-title">Portfolio Performance</h2>
-            <p class="section-subtitle">Real-time performance analytics, radar mesh & distribution statistics</p>
+            <p class="section-subtitle">Real-time performance analytics & distribution statistics</p>
           </div>
         </div>
 
         <div class="charts-2x2-grid mb-4">
-          <!-- Chart 1: Project Completion Comparison (Bar Chart matching Screenshot 1) -->
+          <!-- Card 1: Overall Performance Bar Chart (Replicating Left Card in User Screenshot) -->
           <div class="card chart-card">
-            <div class="card-header pb-3 mb-3">
-              <h3 class="card-title font-playfair font-bold">Project Completion Comparison</h3>
-              <div class="card-header-ctrl">
-                <span class="card-filter-pill">Completion Rate ▾</span>
-              </div>
+            <div class="card-header pb-2 mb-2">
+              <h3 class="card-title font-playfair font-bold">Overall Performance</h3>
             </div>
             <div class="card-body">
-              <PortfolioBarChartGenZ :projects="projectsList" />
+              <PortfolioBarChartExact :projects="projectsList" />
             </div>
           </div>
 
-          <!-- Chart 2: Issue Status Distribution (Doughnut Chart matching Screenshot 2) -->
+          <!-- Card 2: Total Completion Doughnut Chart (Replicating Right Card in User Screenshot) -->
           <div class="card chart-card">
-            <div class="card-header pb-3 mb-3">
-              <h3 class="card-title font-playfair font-bold">Issue Status Distribution</h3>
-              <div class="card-header-ctrl">
-                <span class="card-filter-pill">Status ▾</span>
-              </div>
+            <div class="card-header pb-2 mb-2">
+              <h3 class="card-title font-playfair font-bold">Total Completion</h3>
             </div>
             <div class="card-body">
-              <PortfolioDonutChartGenZ :items="taskStatusDonutItems" />
+              <PortfolioDonutChartExact :items="taskStatusDonutItems" />
             </div>
           </div>
 
-          <!-- Chart 3: Portfolio Health & Quality Radar (Polygon Spider Mesh matching Screenshot 3) -->
+          <!-- Card 3: Portfolio Health Radar (Spider Mesh Chart) -->
           <div class="card chart-card">
             <div class="card-header pb-3 mb-3">
               <h3 class="card-title font-playfair font-bold">Portfolio Health Radar</h3>
-              <div class="card-header-ctrl">
-                <span class="card-filter-pill">Multi-Axis ▾</span>
-              </div>
             </div>
             <div class="card-body">
               <PortfolioRadarChartGenZ :metrics="portfolioMetrics" />
             </div>
           </div>
 
-          <!-- Chart 4: Quick Portfolio Statistics & Priority Stack -->
+          <!-- Card 4: Quick Portfolio Statistics & Priority Stack -->
           <div class="card chart-card">
             <div class="card-header pb-3 mb-3">
               <h3 class="card-title font-playfair font-bold">Quick Portfolio Statistics</h3>
-              <div class="card-header-ctrl">
-                <span class="card-filter-pill">Real-time ▾</span>
-              </div>
             </div>
             <div class="card-body">
-              <PortfolioQuickStatsGenZ :metrics="portfolioMetrics" />
+              <PortfolioQuickStatsGenZ :metrics="portfolioMetrics" :projects="projectsList" />
             </div>
           </div>
         </div>
@@ -656,7 +646,10 @@
             </p>
             <div class="att-footer">
               <span class="rec-tag">Action: Reassign blockers & review capacity</span>
-              <NuxtLink :to="`/projects/${encodeURIComponent(p.companyName)}`" class="btn-link">Resolve &rarr;</NuxtLink>
+              <NuxtLink :to="`/projects/${encodeURIComponent(p.companyName)}`" class="btn-link">
+                Resolve
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-left:3px;margin-top:-1px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </NuxtLink>
             </div>
           </div>
         </div>
@@ -740,8 +733,8 @@ import { useRouter } from 'vue-router';
 import SegmentedProgressBar from '~/components/SegmentedProgressBar.vue';
 import CircularHealthRing from '~/components/CircularHealthRing.vue';
 import CustomSelect from '~/components/CustomSelect.vue';
-import PortfolioBarChartGenZ from '~/components/PortfolioBarChartGenZ.vue';
-import PortfolioDonutChartGenZ from '~/components/PortfolioDonutChartGenZ.vue';
+import PortfolioBarChartExact from '~/components/PortfolioBarChartExact.vue';
+import PortfolioDonutChartExact from '~/components/PortfolioDonutChartExact.vue';
 import PortfolioRadarChartGenZ from '~/components/PortfolioRadarChartGenZ.vue';
 import PortfolioQuickStatsGenZ from '~/components/PortfolioQuickStatsGenZ.vue';
 

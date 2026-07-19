@@ -14,7 +14,7 @@
 
     <!-- Polygon Spider Radar Chart (Directly matching Screenshot 3 Radar Chart) -->
     <div class="radar-svg-container">
-      <svg viewBox="0 0 300 260" class="radar-svg">
+      <svg viewBox="0 0 400 380" class="radar-svg">
         <!-- Concentric Mesh Hexagon Rings -->
         <g class="mesh-rings">
           <polygon
@@ -131,8 +131,8 @@ const props = defineProps({
   metrics: { type: Object, default: () => ({}) }
 });
 
-const center = { x: 150, y: 130 };
-const radius = 85;
+const center = { x: 200, y: 185 };
+const radius = 145;
 
 const axes = [
   'Health Score',
@@ -203,7 +203,7 @@ const dataset2PolygonPoints = computed(() => {
 
 const getLabelPoint = (index) => {
   const angle = (index * 2 * Math.PI) / numAxes - Math.PI / 2;
-  const r = radius + 22;
+  const r = radius + 28;
   return {
     x: center.x + r * Math.cos(angle),
     y: center.y + r * Math.sin(angle) + 4
@@ -272,8 +272,7 @@ const getLabelAnchor = (index) => {
 
 .radar-svg-container {
   width: 100%;
-  max-width: 300px;
-  height: 240px;
+  height: 380px;
   display: flex;
   justify-content: center;
 }

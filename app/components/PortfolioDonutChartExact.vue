@@ -1,269 +1,215 @@
 <template>
-  <div class="exact-donut-card-content">
-    <!-- Header Dropdown Filter Row -->
-    <div class="donut-top-header mb-2">
-      <div class="filter-dropdown-pill">
-        <span>Month</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6 9 12 15 18 9"></polyline>
+  <div class="genzchart-donut">
+    <!-- SVG Donut + Right Legend Grid -->
+    <div class="donut-layout">
+      <!-- SVG Donut Ring -->
+      <div class="donut-svg-wrap">
+        <svg viewBox="0 0 220 220" class="donut-svg" @mouseleave="hovered = null">
+          <!-- Segments -->
+          <g transform="rotate(-90 110 110)">
+            <circle cx="110" cy="110" r="88" fill="none" stroke="#F3F4F6" stroke-width="26" />
+            <circle
+              v-for="(seg, i) in segs"
+              :key="i"
+              cx="110" cy="110" r="88"
+              fill="none"
+              :stroke="seg.color"
+              :stroke-width="hovered === i ? 32 : 26"
+              :stroke-dasharray="`${seg.len} ${circum}`"
+              :stroke-dashoffset="seg.offset"
+              stroke-linecap="butt"
+              class="seg-arc"
+              @mouseenter="hovered = i"
+              style="cursor:pointer"
+            >
+              <title>{{ seg.label }}: {{ seg.count }} issues ({{ seg.pct }}%)</title>
+            </circle>
+          </g>
+          <!-- White dividers between segments -->
+          <g transform="rotate(-90 110 110)">
+            <circle
+              v-for="(seg, i) in segs"
+              :key="'d'+i"
+              cx="110" cy="110" r="88"
+              fill="none" stroke="white" stroke-width="26"
+              :stroke-dasharray="`2 ${circum}`"
+              :stroke-dashoffset="seg.offset"
+              stroke-linecap="butt"
+              style="pointer-events:none"
+            />
+          </g>
         </svg>
-      </div>
-    </div>
-
-    <!-- Doughnut Display with Floating Oval Pill Badges (Directly Matching Screenshot) -->
-    <div class="donut-visual-container">
-      <!-- SVG Radial Ring -->
-      <svg viewBox="0 0 240 240" class="exact-donut-svg">
-        <g transform="rotate(-90 120 120)">
-          <!-- Base background track ring -->
-          <circle cx="120" cy="120" r="72" fill="none" stroke="#F3F4F6" stroke-width="36" />
-
-          <!-- Slice 3: Soft Neutral Gray (6%) -->
-          <circle
-            cx="120"
-            cy="120"
-            r="72"
-            fill="none"
-            stroke="#E5E7EB"
-            stroke-width="36"
-            :stroke-dasharray="`${(0.18 * circumference)} ${circumference}`"
-            :stroke-dashoffset="-((0.58 + 0.24) * circumference)"
-            stroke-linecap="butt"
-          />
-
-          <!-- Slice 2: Warm Amber/Yellow (24%) -->
-          <circle
-            cx="120"
-            cy="120"
-            r="72"
-            fill="none"
-            stroke="#F59E0B"
-            stroke-width="36"
-            :stroke-dasharray="`${(0.24 * circumference)} ${circumference}`"
-            :stroke-dashoffset="-(0.58 * circumference)"
-            stroke-linecap="butt"
-          />
-
-          <!-- Slice 1: Vibrant Blue (58%) -->
-          <circle
-            cx="120"
-            cy="120"
-            r="72"
-            fill="none"
-            stroke="#2563EB"
-            stroke-width="36"
-            :stroke-dasharray="`${(0.58 * circumference)} ${circumference}`"
-            stroke-dashoffset="0"
-            stroke-linecap="butt"
-          />
-        </g>
-      </svg>
-
-      <!-- Center White Hole with Large Percentage (Matching Screenshot 88%) -->
-      <div class="exact-center-circle">
-        <span class="center-percent-num">88%</span>
-        <span class="center-label-sub">Completed</span>
-      </div>
-
-      <!-- Floating Oval Pill Badges Overlay (Directly Replicating Screenshot Pills) -->
-      <!-- Pill 1: Top Right (58% Server / Done) -->
-      <div class="floating-pill-badge top-right">
-        <span class="pill-pct font-bold">58%</span>
-        <div class="pill-sub-row">
-          <span class="pill-dot blue"></span>
-          <span class="pill-name">Done</span>
+        <!-- Center Badge -->
+        <div class="donut-center">
+          <template v-if="hovered !== null">
+            <span class="center-big" :style="{ color: segs[hovered]?.color }">{{ segs[hovered]?.pct }}%</span>
+            <span class="center-lbl">{{ segs[hovered]?.label }}</span>
+          </template>
+          <template v-else>
+            <span class="center-big">{{ totalCount }}</span>
+            <span class="center-lbl">Total Issues</span>
+          </template>
         </div>
       </div>
 
-      <!-- Pill 2: Bottom Left (24% Website / In Progress) -->
-      <div class="floating-pill-badge bottom-left">
-        <span class="pill-pct font-bold">24%</span>
-        <div class="pill-sub-row">
-          <span class="pill-dot yellow"></span>
-          <span class="pill-name">In Progress</span>
-        </div>
-      </div>
-
-      <!-- Pill 3: Bottom Right (6% Others / To Do) -->
-      <div class="floating-pill-badge bottom-right">
-        <span class="pill-pct font-bold">6%</span>
-        <div class="pill-sub-row">
-          <span class="pill-dot-circle gray"></span>
-          <span class="pill-name">Others</span>
+      <!-- Right Legend Grid (2-col) -->
+      <div class="donut-legend-grid">
+        <div
+          v-for="(seg, i) in segs"
+          :key="'lg'+i"
+          class="leg-item"
+          :class="{ dimmed: hovered !== null && hovered !== i }"
+          @mouseenter="hovered = i"
+          @mouseleave="hovered = null"
+        >
+          <div class="leg-item-top">
+            <span class="leg-color-bar" :style="{ background: seg.color }"></span>
+            <span class="leg-name">{{ seg.label }}</span>
+          </div>
+          <div class="leg-item-bottom">
+            <span class="leg-count">{{ seg.count }}</span>
+            <span class="leg-pct">{{ seg.pct }}%</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Bottom Subtext Callout (Matching Bottom Paragraph in Screenshot) -->
-    <div class="donut-bottom-subtext">
-      <p class="subtext-p">
-        <strong>88% more completion</strong> than last month, keep watching to find out your overall progress
-      </p>
+    <!-- Bottom summary bar -->
+    <div class="donut-summary-bar">
+      <div class="summary-track">
+        <div
+          v-for="(seg, i) in segs"
+          :key="'sb'+i"
+          class="summary-seg"
+          :style="{ width: seg.pct + '%', background: seg.color }"
+          :title="`${seg.label}: ${seg.pct}%`"
+        ></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-const circumference = 2 * Math.PI * 72; // radius = 72 => 452.38
+import { ref, computed } from 'vue'
+
+const props = defineProps({
+  items: { type: Array, default: () => [] }
+})
+
+const hovered = ref(null)
+const circum = 2 * Math.PI * 88 // ~552.9
+
+const totalCount = computed(() => props.items.reduce((s, i) => s + (i.value || 0), 0))
+
+const segs = computed(() => {
+  const total = totalCount.value || 1
+  let offset = 0
+  return props.items
+    .filter(i => i.value > 0)
+    .map(item => {
+      const pct = Math.round((item.value / total) * 100)
+      const len = Math.max(2, (item.value / total) * circum)
+      const seg = {
+        label: item.label,
+        count: item.value,
+        pct,
+        color: item.color || '#6B7280',
+        len,
+        offset: -offset
+      }
+      offset += len
+      return seg
+    })
+})
 </script>
 
 <style scoped>
-.exact-donut-card-content {
-  display: flex;
-  flex-direction: column;
+.genzchart-donut { display: flex; flex-direction: column; gap: 1rem; width: 100%; }
+
+.donut-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.25rem;
   align-items: center;
-  width: 100%;
 }
 
-.donut-top-header {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.filter-dropdown-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.65rem;
-  background-color: #ffffff;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #374151;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-}
-
-.donut-visual-container {
+.donut-svg-wrap {
   position: relative;
-  width: 250px;
-  height: 250px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0.5rem 0;
+  width: 220px; height: 220px;
 }
 
-.exact-donut-svg {
-  width: 100%;
-  height: 100%;
+.donut-svg {
+  width: 100%; height: 100%;
 }
 
-.exact-center-circle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+.seg-arc {
+  transition: stroke-width 0.2s ease;
+}
+
+.donut-center {
+  position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 108px;
-  height: 108px;
-  background-color: #ffffff;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+  display: flex; flex-direction: column; align-items: center;
   pointer-events: none;
 }
-
-.center-percent-num {
-  font-size: 2.1rem;
-  font-weight: 800;
-  color: #111827;
-  line-height: 1;
-  letter-spacing: -0.02em;
+.center-big {
+  font-size: 2.1rem; font-weight: 800; color: #111827;
+  line-height: 1; transition: color 0.2s;
+}
+.center-lbl {
+  font-size: 0.75rem; font-weight: 500; color: #9CA3AF; margin-top: 0.25rem;
 }
 
-.center-label-sub {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: #9CA3AF;
-  margin-top: 0.2rem;
+.donut-legend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
 }
 
-/* Floating Oval Pill Badges (Replicating exact position from screenshot) */
-.floating-pill-badge {
-  position: absolute;
-  background-color: #ffffff;
-  padding: 0.45rem 0.85rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #F3F4F6;
-  z-index: 10;
+.leg-item {
+  cursor: pointer;
+  transition: opacity 0.15s;
+  padding: 0.5rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+.leg-item:hover {
+  background: #F9FAFB;
+  border-color: #E5E7EB;
+}
+.leg-item.dimmed { opacity: 0.35; }
+
+.leg-item-top {
+  display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem;
+}
+.leg-color-bar {
+  width: 16px; height: 4px; border-radius: 2px; flex-shrink: 0;
+}
+.leg-name { font-size: 0.75rem; color: #6B7280; font-weight: 500; }
+
+.leg-item-bottom {
+  display: flex; align-items: baseline; gap: 0.4rem;
+}
+.leg-count {
+  font-size: 1.35rem; font-weight: 800; color: #111827; line-height: 1;
+}
+.leg-pct {
+  font-size: 0.72rem; font-weight: 600; color: #9CA3AF;
 }
 
-.floating-pill-badge.top-right {
-  top: 25px;
-  right: 0px;
+/* Bottom summary bar */
+.donut-summary-bar { width: 100%; }
+.summary-track {
+  display: flex; height: 6px; border-radius: 999px; overflow: hidden; background: #F3F4F6;
+}
+.summary-seg {
+  height: 100%;
+  transition: width 0.4s ease;
 }
 
-.floating-pill-badge.bottom-left {
-  bottom: 20px;
-  left: -5px;
-}
-
-.floating-pill-badge.bottom-right {
-  bottom: 15px;
-  right: 5px;
-}
-
-.pill-pct {
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #111827;
-  line-height: 1.1;
-}
-
-.pill-sub-row {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.15rem;
-}
-
-.pill-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.pill-dot.blue { background-color: #2563EB; }
-.pill-dot.yellow { background-color: #F59E0B; }
-
-.pill-dot-circle {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  border: 1.5px solid #9CA3AF;
-  background: transparent;
-}
-
-.pill-name {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #6B7280;
-}
-
-.donut-bottom-subtext {
-  text-align: center;
-  margin-top: 0.5rem;
-  max-width: 220px;
-}
-
-.subtext-p {
-  font-size: 0.75rem;
-  color: #9CA3AF;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.subtext-p strong {
-  color: #4B5563;
+/* Responsive */
+@media (max-width: 480px) {
+  .donut-layout { grid-template-columns: 1fr; justify-items: center; }
 }
 </style>

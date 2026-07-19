@@ -1,268 +1,245 @@
 <template>
-  <div class="exact-bar-card-content">
-    <!-- Main Big Metric Header & Date Picker Filter (Matching Left Card in Screenshot) -->
-    <div class="bar-header-row mb-4">
-      <div class="metric-block">
-        <span class="big-metric-val">{{ formattedTotalValue }}</span>
+  <div class="genzchart-bar">
+    <!-- Metric Summary Row -->
+    <div class="bar-meta-row">
+      <div class="bar-meta-left">
+        <span class="meta-avg-label">Portfolio Avg</span>
+        <span class="meta-avg-val">{{ avgCompletion }}%</span>
       </div>
-      <div class="filter-block">
-        <button class="date-picker-pill">
-          <span>This Sprint</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
-        </button>
+      <div class="bar-meta-right">
+        <span class="meta-range-badge">{{ minVal }}% – {{ maxVal }}%</span>
       </div>
     </div>
 
-    <!-- Chart Main Body with Y-Axis and Wide Rounded Pill Bars -->
-    <div class="bar-chart-body" @mouseleave="hoveredIdx = 3">
-      <!-- Y-Axis Labels -->
-      <div class="y-axis-labels">
-        <span v-for="tick in ['100%', '75%', '50%', '25%', '0%']" :key="tick" class="y-tick font-mono">
-          {{ tick }}
-        </span>
+    <!-- Chart SVG Area -->
+    <div class="bar-chart-svg-area" @mouseleave="hovered = null">
+      <!-- Y-Axis Tick Labels -->
+      <div class="y-axis">
+        <span v-for="t in yAxis" :key="t" class="y-tick">{{ t }}%</span>
       </div>
 
-      <!-- Bars Track Area -->
-      <div class="bars-flex-track">
-        <div
-          v-for="(p, idx) in chartItems"
-          :key="'exact-bar-'+p.name"
-          class="bar-item-col"
-          @mouseenter="hoveredIdx = idx"
-        >
-          <!-- Floating White Tooltip Pill Badge (Matching Sept 10 Callout in Screenshot) -->
-          <Transition name="fade-slide">
-            <div v-if="hoveredIdx === idx" class="floating-tooltip-pill">
-              <span class="tooltip-dot" :style="{ backgroundColor: p.activeColor }"></span>
-              <span class="tooltip-label">{{ p.name }}:</span>
-              <span class="tooltip-val">{{ p.val }}%</span>
-            </div>
-          </Transition>
-
-          <!-- Thick Rounded Pill Bar -->
-          <div class="bar-pill-wrapper">
-            <div
-              class="bar-pill-fill"
-              :class="{ active: hoveredIdx === idx }"
-              :style="{
-                height: getBarHeight(p.val),
-                backgroundColor: hoveredIdx === idx ? p.activeColor : '#F1F5F9'
-              }"
-            ></div>
-          </div>
-
-          <!-- X-Axis Label -->
-          <span class="x-axis-label" :class="{ active: hoveredIdx === idx }">
-            {{ p.shortName }}
-          </span>
+      <!-- Bars + X-Axis -->
+      <div class="bars-and-xaxis">
+        <!-- Horizontal Grid Lines -->
+        <div class="grid-lines">
+          <div v-for="t in yAxis" :key="'gl'+t" class="grid-line"></div>
         </div>
+
+        <!-- Column Bars -->
+        <div class="columns-row">
+          <div
+            v-for="(p, i) in items"
+            :key="p.name"
+            class="col-group"
+            @mouseenter="hovered = i"
+          >
+            <!-- Hover Tooltip -->
+            <Transition name="tooltipfade">
+              <div v-if="hovered === i" class="bar-tooltip">
+                <span class="tip-dot" :style="{ background: p.color }"></span>
+                <span class="tip-name">{{ p.name }}</span>
+                <span class="tip-val">{{ p.val }}%</span>
+              </div>
+            </Transition>
+
+            <!-- The Actual Bar -->
+            <div class="bar-col-track">
+              <div
+                class="bar-col-fill"
+                :style="{
+                  height: `${(p.val / maxAxisVal) * 100}%`,
+                  background: hovered === i ? p.color : 'rgba(107,114,128,0.18)',
+                  boxShadow: hovered === i ? `0 -4px 16px ${p.color}55` : 'none'
+                }"
+              ></div>
+            </div>
+
+            <!-- X-Axis Name -->
+            <span class="x-label" :class="{ active: hovered === i }">{{ p.short }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend Chips -->
+    <div class="bar-legend-chips">
+      <div v-for="p in items" :key="'lg'+p.name" class="chip">
+        <span class="chip-dot" :style="{ background: p.color }"></span>
+        <span class="chip-lbl">{{ p.name }}</span>
+        <span class="chip-pct">{{ p.val }}%</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   projects: { type: Array, default: () => [] }
-});
+})
 
-// Default active index to index 3 (DevOps Tasks) to match Sept 10 in screenshot
-const hoveredIdx = ref(3);
+const hovered = ref(null)
 
-const chartItems = computed(() => {
-  const source = props.projects && props.projects.length > 0 ? props.projects : [
-    { companyName: 'Barena ERP', completionPct: 45 },
-    { companyName: 'DevOps Tasks', completionPct: 75 },
-    { companyName: 'FLEXA ERP', completionPct: 62 },
-    { companyName: 'Glow Box', completionPct: 92 },
-    { companyName: 'Honda POC', completionPct: 84 },
-    { companyName: 'IPOPS', completionPct: 68 }
-  ];
+const COLORS = ['#6366F1','#EC4899','#F59E0B','#10B981','#3B82F6','#EF4444','#A855F7','#14B8A6']
 
-  return source.slice(0, 6).map(p => ({
+const items = computed(() => {
+  const src = props.projects.length > 0 ? props.projects : [
+    { companyName: 'Barena ERP', completionPct: 65 },
+    { companyName: 'DevOps', completionPct: 92 },
+    { companyName: 'FLEXA ERP', completionPct: 43 },
+    { companyName: 'Glow Box', completionPct: 78 },
+    { companyName: 'Honda POC', completionPct: 55 },
+    { companyName: 'IPOPS', completionPct: 88 },
+  ]
+  return src.slice(0, 8).map((p, i) => ({
     name: p.companyName,
-    shortName: (p.companyName || '').substring(0, 7),
-    val: p.completionPct || 50,
-    activeColor: '#3B82F6' // Vibrant Electric Blue from screenshot
-  }));
-});
+    short: (p.companyName || '').substring(0, 6),
+    val: p.completionPct || 0,
+    color: COLORS[i % COLORS.length]
+  }))
+})
 
-const formattedTotalValue = computed(() => {
-  if (!chartItems.value.length) return '78.4%';
-  const avg = Math.round(chartItems.value.reduce((s, i) => s + i.val, 0) / chartItems.value.length);
-  return `${avg}.5% Overall`;
-});
-
-const getBarHeight = (val) => {
-  const pct = Math.min(100, Math.max(12, val));
-  return `${pct}%`;
-};
+const avgCompletion = computed(() => {
+  if (!items.value.length) return 0
+  return Math.round(items.value.reduce((s, i) => s + i.val, 0) / items.value.length)
+})
+const minVal = computed(() => items.value.length ? Math.min(...items.value.map(i => i.val)) : 0)
+const maxVal = computed(() => items.value.length ? Math.max(...items.value.map(i => i.val)) : 100)
+const maxAxisVal = computed(() => {
+  const top = Math.ceil((maxVal.value + 10) / 20) * 20
+  return Math.min(top, 100)
+})
+const yAxis = computed(() => {
+  const steps = []
+  for (let v = maxAxisVal.value; v >= 0; v -= 20) steps.push(v)
+  return steps
+})
 </script>
 
 <style scoped>
-.exact-bar-card-content {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
+.genzchart-bar { display: flex; flex-direction: column; gap: 0.85rem; width: 100%; }
 
-.bar-header-row {
+.bar-meta-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-}
-
-.big-metric-val {
-  font-size: 1.85rem;
-  font-weight: 800;
-  color: #111827;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
-.date-picker-pill {
-  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  background-color: #ffffff;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #4B5563;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-  transition: all 0.15s ease;
+}
+.meta-avg-label { font-size: 0.72rem; color: #9CA3AF; font-weight: 500; }
+.meta-avg-val { font-size: 1.4rem; font-weight: 800; color: #111827; margin-left: 0.4rem; }
+.meta-range-badge {
+  font-size: 0.72rem; font-weight: 600; color: #6B7280;
+  background: #F3F4F6; padding: 0.2rem 0.6rem; border-radius: 999px;
 }
 
-.date-picker-pill:hover {
-  border-color: #3B82F6;
-  color: #1D4ED8;
-}
-
-.bar-chart-body {
+.bar-chart-svg-area {
   position: relative;
-  height: 220px;
-  width: 100%;
   display: flex;
-  margin-top: 0.5rem;
+  height: 200px;
+  gap: 0;
 }
 
-.y-axis-labels {
+.y-axis {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 175px;
-  padding-right: 0.85rem;
+  width: 36px;
+  flex-shrink: 0;
+  padding-bottom: 22px;
 }
+.y-tick { font-size: 0.68rem; font-weight: 500; color: #9CA3AF; text-align: right; }
 
-.y-tick {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: #9CA3AF;
-  white-space: nowrap;
-}
-
-.bars-flex-track {
+.bars-and-xaxis {
+  position: relative;
   flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  height: 100%;
-  padding-bottom: 30px;
+  flex-direction: column;
 }
 
-.bar-item-col {
+.grid-lines {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.grid-line {
+  width: 100%; height: 1px;
+  background: #F3F4F6;
+}
+
+.columns-row {
   position: relative;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding-bottom: 22px;
+}
+
+.col-group {
+  position: relative;
+  flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100%;
   justify-content: flex-end;
-  flex: 1;
   cursor: pointer;
-  padding: 0 6px;
 }
 
-.floating-tooltip-pill {
+.bar-tooltip {
   position: absolute;
-  top: -38px;
-  background-color: #ffffff;
-  color: #111827;
-  padding: 0.4rem 0.8rem;
-  border-radius: 9999px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
-  font-size: 0.75rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  top: -40px;
+  left: 50%; transform: translateX(-50%);
+  background: #1E293B;
+  border-radius: 8px;
+  padding: 0.3rem 0.65rem;
+  display: flex; align-items: center; gap: 0.4rem;
   white-space: nowrap;
-  z-index: 20;
-  border: 1px solid #F3F4F6;
+  z-index: 30;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
+.tip-dot { width: 7px; height: 7px; border-radius: 50%; }
+.tip-name { font-size: 0.7rem; color: #CBD5E1; font-weight: 500; }
+.tip-val { font-size: 0.78rem; font-weight: 800; color: #F8FAFC; }
 
-.tooltip-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.tooltip-label {
-  color: #6B7280;
-  font-weight: 500;
-}
-
-.bar-pill-wrapper {
+.bar-col-track {
   width: 100%;
-  max-width: 48px;
-  height: 175px;
-  display: flex;
-  align-items: flex-end;
+  height: 100%;
+  display: flex; align-items: flex-end;
 }
-
-.bar-pill-fill {
+.bar-col-fill {
   width: 100%;
-  border-radius: 16px;
-  transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, transform 0.15s ease;
+  border-radius: 8px 8px 0 0;
+  transition: height 0.4s cubic-bezier(.4,0,.2,1), background 0.2s, box-shadow 0.2s;
+  min-height: 4px;
 }
 
-.bar-pill-fill.active {
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-}
-
-.x-axis-label {
-  position: absolute;
-  bottom: 0;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #9CA3AF;
+.x-label {
+  position: absolute; bottom: 0;
+  font-size: 0.68rem; font-weight: 500; color: #9CA3AF;
+  transition: color 0.15s, font-weight 0.15s;
   white-space: nowrap;
-  transition: color 0.15s ease, font-weight 0.15s ease;
 }
+.x-label.active { color: #111827; font-weight: 700; }
 
-.x-axis-label.active {
-  color: #111827;
-  font-weight: 700;
+.bar-legend-chips {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
 }
+.chip {
+  display: flex; align-items: center; gap: 0.35rem;
+  background: #F9FAFB; border: 1px solid #E5E7EB;
+  border-radius: 999px; padding: 0.2rem 0.55rem;
+  font-size: 0.7rem;
+}
+.chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+.chip-lbl { color: #4B5563; font-weight: 500; }
+.chip-pct { color: #111827; font-weight: 700; }
 
-/* Animations */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(4px);
-}
+/* Transition */
+.tooltipfade-enter-active, .tooltipfade-leave-active { transition: opacity 0.12s ease, transform 0.12s ease; }
+.tooltipfade-enter-from, .tooltipfade-leave-to { opacity: 0; transform: translateX(-50%) translateY(4px); }
 </style>
