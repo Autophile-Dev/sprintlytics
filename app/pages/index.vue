@@ -3,7 +3,7 @@
     <!-- Header with Left Title & Right Global Filters -->
     <header class="dashboard-topbar">
       <div class="topbar-left">
-        <h1 class="portfolio-title">Portfolio Overview</h1>
+        <h1 class="portfolio-title">Dashboard</h1>
         <p class="portfolio-subtitle">Executive view across all connected Jira projects & AI analytics</p>
       </div>
 
@@ -381,133 +381,7 @@
         </div>
       </section>
 
-      <!-- SECTION 3 — Portfolio Analytics Visualizations & Standardized Charts -->
-      <section class="section-container">
-        <div class="section-header">
-          <h2 class="section-title">Portfolio Performance Analytics & Charts</h2>
-          <span class="section-subtitle">Real-time cross-project analytics visualization</span>
-        </div>
 
-        <div class="charts-2x2-grid mb-4">
-          <!-- Chart 1: Historical Trend (SVG Line Chart) -->
-          <div class="card chart-card">
-            <div class="card-header">
-              <h3 class="card-title">Portfolio Health & Completion Trend</h3>
-              <span class="card-tag">Line Chart</span>
-            </div>
-            <div class="card-body">
-              <PortfolioLineChart :reports="recentReportsList" />
-            </div>
-          </div>
-
-          <!-- Chart 2: Task Status Distribution (SVG Donut Chart) -->
-          <div class="card chart-card">
-            <div class="card-header">
-              <h3 class="card-title">Task Status Breakdown</h3>
-              <span class="card-tag">Donut / Pie Chart</span>
-            </div>
-            <div class="card-body">
-              <PortfolioDonutChart :items="taskStatusDonutItems" center-label="Total Sprint Tasks" />
-            </div>
-          </div>
-
-          <!-- Chart 3: Completion Rate Comparison (Horizontal Bar Chart with Grid) -->
-          <div class="card chart-card">
-            <div class="card-header">
-              <h3 class="card-title">Project Completion Comparison</h3>
-              <span class="card-tag">Horizontal Bar</span>
-            </div>
-            <div class="card-body">
-              <PortfolioHorizontalBarChart :projects="projectsList" />
-            </div>
-          </div>
-
-          <!-- Chart 4: Velocity Target vs Actual (Vertical Column Bar Chart) -->
-          <div class="card chart-card">
-            <div class="card-header">
-              <h3 class="card-title">Velocity Target Comparison</h3>
-              <span class="card-tag">Column Bar (pts)</span>
-            </div>
-            <div class="card-body">
-              <div class="vbar-chart-container">
-                <div class="vbar-bars">
-                  <div v-for="p in projectsList" :key="'vel-'+p.companyName" class="vbar-col">
-                    <div class="vbar-bar-wrapper">
-                      <div class="vbar-fill blue" :style="{ height: Math.min(100, (p.velocity / 50) * 100) + '%' }" :title="`${p.companyName}: ${p.velocity} pts`"></div>
-                    </div>
-                    <span class="vbar-label">{{ p.companyName.substring(0, 8) }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Heatmap Section — Cross-Project Analytics Heatmap -->
-        <div class="card padding-1-25rem mb-4">
-          <div class="card-header border-bottom pb-3 mb-3">
-            <h3 class="card-title">Cross-Project Performance & Risk Heatmap</h3>
-            <span class="card-tag">Heatmap Matrix</span>
-          </div>
-          <PortfolioHeatmap :projects="projectsList" />
-        </div>
-      </section>
-
-      <!-- SECTION 4 — Portfolio Health Matrix -->
-      <section class="section-container">
-        <div class="section-header">
-          <h2 class="section-title">Portfolio Health Matrix</h2>
-        </div>
-
-        <div class="card padding-none">
-          <div class="table-responsive">
-            <table class="matrix-table">
-              <thead>
-                <tr>
-                  <th>Project Name</th>
-                  <th>Health Score</th>
-                  <th>Completion Rate</th>
-                  <th>Velocity</th>
-                  <th>Risk Level</th>
-                  <th>Trend</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="p in projectsList" :key="'mat-'+p.companyName">
-                  <td class="font-semibold cursor-pointer" @click="navigateToProject(p.companyName)">
-                    {{ p.companyName }}
-                  </td>
-                  <td>
-                    <div class="matrix-val-cell">
-                      <span class="status-badge" :class="getHealthClass(p.healthScore)">{{ p.healthScore }}%</span>
-                      <div class="mini-bar-bg"><div class="mini-bar-fill" :style="{ width: p.healthScore + '%' }"></div></div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="matrix-val-cell">
-                      <span>{{ p.completionPct }}%</span>
-                      <div class="mini-bar-bg"><div class="mini-bar-fill blue" :style="{ width: p.completionPct + '%' }"></div></div>
-                    </div>
-                  </td>
-                  <td>{{ p.velocity }} pts</td>
-                  <td>
-                    <span class="risk-badge" :class="p.riskLevel.toLowerCase()">{{ p.riskLevel }}</span>
-                  </td>
-                  <td>
-                    <span class="trend-badge" :class="p.healthScore >= 75 ? 'positive' : 'negative'">
-                      {{ p.healthScore >= 75 ? '↑ Improving' : '↘ Declining' }}
-                    </span>
-                  </td>
-                  <td>
-                    <NuxtLink :to="`/projects/${encodeURIComponent(p.companyName)}`" class="btn-link">View &rarr;</NuxtLink>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
 
       <!-- SECTION 5 — AI Executive Insights -->
       <section class="section-container">
@@ -1560,6 +1434,9 @@ const navigateToProject = (companyName) => {
   text-transform: uppercase;
   margin: 0 0 0.75rem;
 }
+
+.padding-1-25rem { padding: 1.25rem 1.5rem; }
+.pb-3 { padding-bottom: 0.85rem; }
 
 .ai-block-title.text-emerald { color: #34D399; }
 .ai-block-title.text-danger { color: #FCA5A5; }
