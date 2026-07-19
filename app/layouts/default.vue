@@ -105,10 +105,12 @@ const handleLogout = async () => {
 
 .page-content {
   flex: 1;
-  padding: 2rem 2.5rem;
+  padding: 1.75rem 1.30rem 2.5rem 1.70rem;
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+
 
 @media (max-width: 768px) {
   .main-container {

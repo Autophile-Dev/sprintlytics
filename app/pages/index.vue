@@ -30,6 +30,19 @@
           />
         </div>
 
+        <!-- Clear Filter Cross (✕) Button (only visible when a specific project is filtered) -->
+        <button
+          v-if="selectedProject && selectedProject !== 'ALL' && selectedProject !== ''"
+          class="icon-btn clear-filter-btn"
+          @click="clearFilters"
+          title="Clear Filter (Show All Projects)"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
         <!-- Refresh Button -->
         <button class="icon-btn refresh-btn" @click="fetchDashboardData" :disabled="pending" title="Refresh Dashboard">
           <svg :class="{ spinning: pending }" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -37,18 +50,12 @@
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
         </button>
-
-        <!-- Notification & AI Status -->
-        <div class="ai-status-pill">
-          <span class="dot pulse"></span> AI Online
-        </div>
       </div>
     </header>
 
-    <!-- Full Dashboard Loading State (Triggers on Initial Load & Filter Changes) -->
-    <div v-if="pending" class="loading-overlay">
+    <!-- Simple Centered Loading Spinner (No box, no text) -->
+    <div v-if="pending" class="simple-loading-spinner">
       <div class="spinner"></div>
-      <p class="loading-text">Updating Portfolio Dashboard...</p>
     </div>
 
     <template v-else>
@@ -375,7 +382,77 @@
               <span class="risk-badge" :class="p.riskLevel.toLowerCase()">
                 {{ p.riskLevel }} Risk
               </span>
-              <span class="sprint-tag">{{ p.sprintState }}</span>
+              <span
+                class="status-pill-badge"
+                :class="p.sprintState?.toUpperCase() === 'INACTIVE' || p.sprintState?.toUpperCase() === 'CLOSED' ? 'inactive' : 'active'"
+              >
+                <span class="status-dot"></span>
+                {{ p.sprintState || 'ACTIVE' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3 — Portfolio Performance -->
+      <section class="section-container mb-4">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Portfolio Performance</h2>
+            <p class="section-subtitle">Real-time performance analytics, radar mesh & distribution statistics</p>
+          </div>
+        </div>
+
+        <div class="charts-2x2-grid mb-4">
+          <!-- Chart 1: Project Completion Comparison (Bar Chart matching Screenshot 1) -->
+          <div class="card chart-card">
+            <div class="card-header pb-3 mb-3">
+              <h3 class="card-title font-playfair font-bold">Project Completion Comparison</h3>
+              <div class="card-header-ctrl">
+                <span class="card-filter-pill">Completion Rate ▾</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <PortfolioBarChartGenZ :projects="projectsList" />
+            </div>
+          </div>
+
+          <!-- Chart 2: Issue Status Distribution (Doughnut Chart matching Screenshot 2) -->
+          <div class="card chart-card">
+            <div class="card-header pb-3 mb-3">
+              <h3 class="card-title font-playfair font-bold">Issue Status Distribution</h3>
+              <div class="card-header-ctrl">
+                <span class="card-filter-pill">Status ▾</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <PortfolioDonutChartGenZ :items="taskStatusDonutItems" />
+            </div>
+          </div>
+
+          <!-- Chart 3: Portfolio Health & Quality Radar (Polygon Spider Mesh matching Screenshot 3) -->
+          <div class="card chart-card">
+            <div class="card-header pb-3 mb-3">
+              <h3 class="card-title font-playfair font-bold">Portfolio Health Radar</h3>
+              <div class="card-header-ctrl">
+                <span class="card-filter-pill">Multi-Axis ▾</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <PortfolioRadarChartGenZ :metrics="portfolioMetrics" />
+            </div>
+          </div>
+
+          <!-- Chart 4: Quick Portfolio Statistics & Priority Stack -->
+          <div class="card chart-card">
+            <div class="card-header pb-3 mb-3">
+              <h3 class="card-title font-playfair font-bold">Quick Portfolio Statistics</h3>
+              <div class="card-header-ctrl">
+                <span class="card-filter-pill">Real-time ▾</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <PortfolioQuickStatsGenZ :metrics="portfolioMetrics" />
             </div>
           </div>
         </div>
@@ -663,6 +740,10 @@ import { useRouter } from 'vue-router';
 import SegmentedProgressBar from '~/components/SegmentedProgressBar.vue';
 import CircularHealthRing from '~/components/CircularHealthRing.vue';
 import CustomSelect from '~/components/CustomSelect.vue';
+import PortfolioBarChartGenZ from '~/components/PortfolioBarChartGenZ.vue';
+import PortfolioDonutChartGenZ from '~/components/PortfolioDonutChartGenZ.vue';
+import PortfolioRadarChartGenZ from '~/components/PortfolioRadarChartGenZ.vue';
+import PortfolioQuickStatsGenZ from '~/components/PortfolioQuickStatsGenZ.vue';
 
 const router = useRouter();
 
@@ -705,6 +786,11 @@ const fetchDashboardData = async () => {
 
 const setPeriod = (p) => {
   selectedPeriod.value = p;
+  fetchDashboardData();
+};
+
+const clearFilters = () => {
+  selectedProject.value = 'ALL';
   fetchDashboardData();
 };
 
@@ -787,14 +873,13 @@ const navigateToProject = (companyName) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #E5E7EB;
-  padding-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
 }
 
 .portfolio-title {
   font-family: 'Playfair Display', serif;
   font-size: 2.15rem;
-  font-weight: 500;
+  font-weight: 700;
   color: #111827;
   margin: 0;
   letter-spacing: -0.02em;
@@ -908,7 +993,7 @@ const navigateToProject = (companyName) => {
 .section-title {
   font-family: 'Playfair Display', serif;
   font-size: 1.35rem;
-  font-weight: 500;
+  font-weight: 700;
   color: #111827;
   margin: 0;
 }
@@ -917,6 +1002,15 @@ const navigateToProject = (companyName) => {
   font-size: 0.82rem;
   color: #6B7280;
   margin: 0.2rem 0 0;
+}
+
+/* Base Card Global Shadow */
+.card {
+  background: #ffffff;
+  border: none !important;
+  outline: none !important;
+  border-radius: 16px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
 }
 
 /* SECTION 1 — Executive KPI Cards (8 Premium Grid, 4 per row) */
@@ -928,20 +1022,21 @@ const navigateToProject = (companyName) => {
 
 .kpi-card-premium {
   background: #ffffff;
-  border: 1px solid #E5E7EB;
+  border: none !important;
+  outline: none !important;
   border-radius: 18px;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 0.875rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .kpi-card-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 20px 0px;
 }
 
 .kpi-header-row {
@@ -1054,20 +1149,21 @@ const navigateToProject = (companyName) => {
 
 .project-overview-card {
   background: #ffffff;
-  border: 1px solid #E5E7EB;
+  border: none !important;
+  outline: none !important;
   border-radius: 18px;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   cursor: pointer;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .project-overview-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.08);
-  border-color: #A7F3D0;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 20px 0px;
 }
 
 .project-card-top {
@@ -1128,11 +1224,45 @@ const navigateToProject = (companyName) => {
 .risk-badge.medium { background: #FEF3C7; color: #D97706; }
 .risk-badge.high { background: #FEF2F2; color: #EF4444; }
 
-.sprint-tag {
+.status-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.72rem;
+  font-weight: 700;
   text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+.status-pill-badge.active {
+  background-color: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
+}
+
+.status-pill-badge.inactive {
+  background-color: #F3F4F6;
   color: #6B7280;
-  font-weight: 600;
+  border: 1px solid #E5E7EB;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-pill-badge.active .status-dot {
+  background-color: #10B981;
+  animation: pulse 1.8s infinite;
+}
+
+.status-pill-badge.inactive .status-dot {
+  background-color: #9CA3AF;
 }
 
 /* SECTION 3 — Portfolio Performance (Charts Grid) */
@@ -1144,20 +1274,22 @@ const navigateToProject = (companyName) => {
 
 .chart-card {
   background: #ffffff;
-  border: 1px solid #E5E7EB;
+  border: none !important;
+  outline: none !important;
   border-radius: 18px;
   padding: 1.25rem;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
 }
 
 .card-title {
-  font-size: 1rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #111827;
   margin: 0;
@@ -1166,10 +1298,45 @@ const navigateToProject = (companyName) => {
 .card-tag {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #6B7280;
+  color: #059669;
+  background-color: #ECFDF5;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid #A7F3D0;
+}
+
+.card-filter-pill {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #374151;
+  background-color: #ffffff;
+  border: 1px solid #E5E7EB;
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.card-filter-pill:hover {
+  border-color: #A7F3D0;
+  color: #059669;
+}
+
+.dots-btn {
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.dots-btn:hover {
+  color: #111827;
   background: #F3F4F6;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
 }
 
 /* Horizontal Bar Chart */
@@ -1323,6 +1490,7 @@ const navigateToProject = (companyName) => {
   color: #ffffff;
   border: none;
   padding: 1.5rem;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
 }
 
 .ai-header {
@@ -1479,17 +1647,19 @@ const navigateToProject = (companyName) => {
 
 .team-stat-card {
   background: #ffffff;
-  border: 1px solid #E5E7EB;
+  border: none !important;
+  outline: none !important;
   border-radius: 14px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
 }
 
-.team-stat-card.border-success { border-top: 3px solid #059669; }
-.team-stat-card.border-warning { border-top: 3px solid #F59E0B; }
-.team-stat-card.border-blue { border-top: 3px solid #2563EB; }
+.team-stat-card.border-success { border-top: 3px solid #059669 !important; }
+.team-stat-card.border-warning { border-top: 3px solid #F59E0B !important; }
+.team-stat-card.border-blue { border-top: 3px solid #2563EB !important; }
 
 .stat-label { font-size: 0.75rem; color: #6B7280; font-weight: 600; text-transform: uppercase; }
 .stat-num { font-size: 1.5rem; font-weight: 700; color: #111827; margin-top: 0.25rem; }
@@ -1576,12 +1746,14 @@ const navigateToProject = (companyName) => {
 /* SECTION 8 — Projects Requiring Attention */
 .project-attention-card {
   background: #FEF2F2;
-  border: 1px solid #FCA5A5;
+  border: none !important;
+  outline: none !important;
   border-radius: 16px;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
 }
 
 .att-header { display: flex; justify-content: space-between; align-items: center; }
@@ -1609,12 +1781,14 @@ const navigateToProject = (companyName) => {
 
 .stat-box {
   background: #ffffff;
-  border: 1px solid #E5E7EB;
+  border: none !important;
+  outline: none !important;
   border-radius: 12px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
 }
 
 .stat-box .lbl { font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; }
@@ -1633,17 +1807,24 @@ const navigateToProject = (companyName) => {
 .text-success { color: #059669; }
 .text-warning { color: #D97706; }
 .text-blue { color: #2563EB; }
-.loading-overlay {
+.clear-filter-btn {
+  color: #EF4444;
+  border-color: #FCA5A5;
+  background: #FEF2F2;
+}
+
+.clear-filter-btn:hover {
+  background: #FEE2E2;
+  color: #DC2626;
+  border-color: #F87171;
+}
+
+.simple-loading-spinner {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  padding: 6rem 2rem;
-  background: #ffffff;
-  border-radius: 18px;
-  border: 1px solid #E5E7EB;
-  min-height: 400px;
+  align-items: center;
+  padding: 4rem 0;
+  width: 100%;
 }
 
 .spinner {
@@ -1653,12 +1834,6 @@ const navigateToProject = (companyName) => {
   border-top: 3.5px solid #059669;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-}
-
-.loading-text {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #4B5563;
 }
 
 @media (max-width: 1024px) {

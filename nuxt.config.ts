@@ -4,6 +4,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   vite: {
+    server: {
+      watch: {
+        ignored: ['**/.nuxt/**', '**/.output/**', '**/node_modules/**', '**/.git/**'],
+      },
+    },
     optimizeDeps: {
       include: [
         '@vue/devtools-core',
@@ -25,6 +30,9 @@ export default defineNuxtConfig({
 
   // Security headers using Nitro route rules
   nitro: {
+    watchOptions: {
+      ignored: ['**/.nuxt/**', '**/.output/**', '**/node_modules/**', '**/.git/**'],
+    },
     routeRules: {
       '/**': {
         headers: {

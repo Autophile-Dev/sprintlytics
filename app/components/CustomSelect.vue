@@ -48,7 +48,9 @@ const containerRef = ref(null);
 
 const selectedLabel = computed(() => {
   const found = props.options.find(o => o.value === props.modelValue);
-  return found ? found.label : 'Select Option';
+  if (found) return found.label;
+  if (props.options && props.options.length > 0) return props.options[0].label;
+  return 'Select Option';
 });
 
 const toggleOpen = () => {

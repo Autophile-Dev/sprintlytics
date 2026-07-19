@@ -1,54 +1,71 @@
 <template>
-  <div class="donut-chart-wrapper">
-    <!-- SVG Radial Donut Chart (Large 230px Display) -->
-    <div class="donut-display">
-      <div class="donut-svg-box">
-        <svg viewBox="0 0 200 200" class="donut-svg">
-          <g transform="rotate(-90 100 100)">
+  <div class="donut-card-inner">
+    <!-- Main Content: Left SVG Donut + Right 2-Column Legend Grid -->
+    <div class="donut-main-grid">
+      <!-- Left SVG Radial Ring with Center Counter & Segment Text Labels -->
+      <div class="donut-svg-wrapper">
+        <svg viewBox="0 0 220 220" class="donut-svg">
+          <g transform="rotate(-90 110 110)">
             <!-- Base background track ring -->
-            <circle cx="100" cy="100" r="78" fill="none" stroke="#F3F4F6" stroke-width="18" />
+            <circle cx="110" cy="110" r="76" fill="none" stroke="#F3F4F6" stroke-width="26" />
             
-            <!-- Segment Rings -->
+            <!-- Donut Segments -->
             <circle
               v-for="(seg, idx) in segments"
               :key="'seg-'+idx"
-              cx="100"
-              cy="100"
-              r="78"
+              cx="110"
+              cy="110"
+              r="76"
               fill="none"
               :stroke="seg.color"
-              stroke-width="18"
+              stroke-width="26"
               :stroke-dasharray="`${seg.dashLen} ${circumference}`"
               :stroke-dashoffset="seg.dashOffset"
               stroke-linecap="round"
-              class="donut-ring-segment"
+              class="donut-segment"
             >
               <title>{{ seg.label }}: {{ seg.value }} ({{ seg.pct }}%)</title>
             </circle>
           </g>
+
+          <!-- Percentage Labels Printed INSIDE Donut Ring Segments (Inspired by Screenshot 2) -->
+          <g class="segment-labels-group">
+            <text
+              v-for="(seg, idx) in segments"
+              :key="'lbl-'+idx"
+              v-show="seg.pct > 5"
+              :x="seg.labelX"
+              :y="seg.labelY"
+              text-anchor="middle"
+              dominant-baseline="central"
+              fill="#ffffff"
+              font-size="10.5"
+              font-weight="700"
+            >
+              {{ seg.pct }}%
+            </text>
+          </g>
         </svg>
 
-        <!-- Center Counter Badge (Large) -->
+        <!-- Center Counter Badge -->
         <div class="donut-center-badge">
-          <div class="center-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
-          </div>
-          <span class="center-main-num">{{ totalValue }}</span>
-          <span class="center-sub-label">{{ centerLabel }}</span>
+          <span class="center-pct">{{ completedPct }}%</span>
+          <span class="center-sub">{{ centerLabel || 'Completed' }}</span>
         </div>
       </div>
-    </div>
 
-    <!-- Aligned Legend List -->
-    <div class="donut-legend-list">
-      <div v-for="(seg, idx) in segments" :key="'item-'+idx" class="legend-row">
-        <div class="row-left">
-          <span class="item-square-icon" :style="{ backgroundColor: seg.color }"></span>
-          <span class="item-label">{{ seg.label }}</span>
+      <!-- Right Side 2-Column Legend Grid (Inspired directly by Screenshot 1) -->
+      <div class="donut-legend-grid">
+        <div v-for="(seg, idx) in segments" :key="'leg-'+idx" class="legend-grid-item">
+          <div class="item-top">
+            <span class="color-dot" :style="{ backgroundColor: seg.color }"></span>
+            <span class="item-name">{{ seg.label }}</span>
+          </div>
+          <div class="item-value-row">
+            <span class="item-count">{{ seg.value }}</span>
+            <span class="item-pct-sub">{{ seg.pct }}%</span>
+          </div>
         </div>
-        <span class="row-right font-bold">{{ seg.pct }}% <span class="count-sub">({{ seg.value }})</span></span>
       </div>
     </div>
   </div>
@@ -59,19 +76,27 @@ import { computed } from 'vue';
 
 const props = defineProps({
   items: { type: Array, default: () => [] },
-  centerLabel: { type: String, default: 'Total Items' }
+  centerLabel: { type: String, default: 'Completed' }
 });
 
-const circumference = 2 * Math.PI * 78; // radius = 78 => 490.09
+const circumference = 2 * Math.PI * 76; // radius = 76 => 477.52
 
 const totalValue = computed(() => {
   if (!props.items || props.items.length === 0) return 0;
   return props.items.reduce((sum, item) => sum + (item.value || 0), 0);
 });
 
+const completedPct = computed(() => {
+  if (totalValue.value === 0) return 0;
+  const doneItem = (props.items || []).find(i => (i.label || '').toLowerCase().includes('done'));
+  const doneVal = doneItem ? doneItem.value : (props.items[0]?.value || 0);
+  return Math.round((doneVal / totalValue.value) * 100);
+});
+
 const segments = computed(() => {
   const total = totalValue.value || 1;
   let accumulatedOffset = 0;
+  let accumulatedAngle = 0;
 
   return (props.items || []).map(item => {
     const val = item.value || 0;
@@ -79,7 +104,15 @@ const segments = computed(() => {
     const dashLen = Math.max(2, (val / total) * circumference);
     const dashOffset = -accumulatedOffset;
 
+    // Angle calculation for placing percentage text inside ring segment
+    const segmentAngle = (val / total) * 360;
+    const midAngle = accumulatedAngle + segmentAngle / 2;
+    const rad = (midAngle - 90) * (Math.PI / 180);
+    const labelX = 110 + 76 * Math.cos(rad);
+    const labelY = 110 + 76 * Math.sin(rad);
+
     accumulatedOffset += dashLen;
+    accumulatedAngle += segmentAngle;
 
     return {
       label: item.label || 'Item',
@@ -87,32 +120,34 @@ const segments = computed(() => {
       pct,
       color: item.color || '#059669',
       dashLen,
-      dashOffset
+      dashOffset,
+      labelX,
+      labelY
     };
   });
 });
 </script>
 
 <style scoped>
-.donut-chart-wrapper {
+.donut-card-inner {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.donut-main-grid {
+  display: grid;
+  grid-template-columns: 210px 1fr;
   gap: 1.5rem;
+  align-items: center;
   width: 100%;
 }
 
-.donut-display {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding-top: 0.5rem;
-}
-
-.donut-svg-box {
+.donut-svg-wrapper {
   position: relative;
-  width: 230px;
-  height: 230px;
+  width: 210px;
+  height: 210px;
 }
 
 .donut-svg {
@@ -120,13 +155,13 @@ const segments = computed(() => {
   height: 100%;
 }
 
-.donut-ring-segment {
-  transition: stroke-width 0.25s ease, opacity 0.25s ease;
+.donut-segment {
+  transition: stroke-width 0.2s ease, opacity 0.2s ease;
   cursor: pointer;
 }
 
-.donut-ring-segment:hover {
-  stroke-width: 22;
+.donut-segment:hover {
+  stroke-width: 30;
 }
 
 .donut-center-badge {
@@ -141,73 +176,76 @@ const segments = computed(() => {
   pointer-events: none;
 }
 
-.center-icon {
-  color: #059669;
-  margin-bottom: 0.2rem;
-}
-
-.center-main-num {
-  font-size: 2.2rem;
+.center-pct {
+  font-size: 1.85rem;
   font-weight: 800;
   color: #111827;
   line-height: 1;
 }
 
-.center-sub-label {
-  font-size: 0.78rem;
+.center-sub {
+  font-size: 0.72rem;
   font-weight: 600;
   color: #6B7280;
-  margin-top: 0.3rem;
+  margin-top: 0.25rem;
   white-space: nowrap;
 }
 
-.donut-legend-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.donut-legend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem 1.25rem;
   width: 100%;
 }
 
-.legend-row {
+.legend-grid-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-  color: #374151;
-  padding: 0.3rem 0;
-  border-bottom: 1px stroke #F3F4F6;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
-.legend-row:last-child {
-  border-bottom: none;
-}
-
-.row-left {
+.item-top {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.4rem;
 }
 
-.item-square-icon {
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
+.color-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
-.item-label {
+.item-name {
+  font-size: 0.8rem;
   font-weight: 500;
-  color: #4B5563;
+  color: #6B7280;
 }
 
-.row-right {
-  font-size: 0.875rem;
+.item-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding-left: 0.95rem;
+}
+
+.item-count {
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #111827;
 }
 
-.count-sub {
-  font-size: 0.78rem;
+.item-pct-sub {
+  font-size: 0.75rem;
+  font-weight: 600;
   color: #9CA3AF;
-  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .donut-main-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
 }
 </style>
