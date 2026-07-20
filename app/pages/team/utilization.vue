@@ -907,8 +907,16 @@ const avatarBgColor = (name) => {
 };
 
 const onProjectChange = () => {
+  router.replace({ query: { ...route.query, project: selectedProject.value } });
   fetchData();
 };
+
+watch(() => route.query.project, (newProj) => {
+  if (newProj && newProj !== selectedProject.value) {
+    selectedProject.value = newProj;
+    fetchData();
+  }
+});
 
 // Fetch Data from API
 const fetchData = async () => {
