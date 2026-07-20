@@ -89,8 +89,8 @@
                 +8.4% vs prev
               </span>
             </div>
-            <div class="kpi-sparkline-wrap">
-              <SparklineChart variant="positive" :height="32" :points="[68, 72, 75, 80, 78, 84, 82, portfolioMetrics.healthScore || 88]" />
+            <div class="kpi-segmented-wrap">
+              <SegmentedProgressBar :value="portfolioMetrics.healthScore || 88" variant="emerald" height="18px" :total-segments="44" />
             </div>
             <div class="kpi-footer-row">
               <span class="kpi-footer-label">Status: {{ portfolioMetrics.healthLabel || 'Optimal' }}</span>
@@ -122,8 +122,8 @@
                 +4.2% vs prev
               </span>
             </div>
-            <div class="kpi-sparkline-wrap">
-              <SparklineChart variant="positive" :height="32" :points="[45, 52, 60, 58, 65, 72, 70, portfolioMetrics.completionPct || 78]" />
+            <div class="kpi-segmented-wrap">
+              <SegmentedProgressBar :value="portfolioMetrics.completionPct || 78" variant="blue" height="18px" :total-segments="44" />
             </div>
             <div class="kpi-footer-row">
               <span class="kpi-footer-label">Sprint Deliverables</span>
@@ -154,8 +154,8 @@
                 +12.5% vs prev
               </span>
             </div>
-            <div class="kpi-sparkline-wrap">
-              <SparklineChart variant="positive" :height="32" :points="[210, 230, 225, 250, 245, 270, 260, portfolioMetrics.velocity || 284]" />
+            <div class="kpi-segmented-wrap">
+              <SegmentedProgressBar :value="Math.min(100, Math.round(((portfolioMetrics.velocity || 284) / 350) * 100))" variant="purple" height="18px" :total-segments="44" />
             </div>
             <div class="kpi-footer-row">
               <span class="kpi-footer-label">Story Points</span>
@@ -187,8 +187,8 @@
                 {{ portfolioMetrics.totalBlocked > 0 ? '-2 blockers' : '0 Blockers' }}
               </span>
             </div>
-            <div class="kpi-sparkline-wrap">
-              <SparklineChart variant="negative" :height="32" :points="[6, 5, 8, 4, 3, 5, 2, portfolioMetrics.totalBlocked || 0]" />
+            <div class="kpi-segmented-wrap">
+              <SegmentedProgressBar :value="Math.max(0, 100 - (portfolioMetrics.totalBlocked || 0) * 10)" variant="red" height="18px" :total-segments="44" />
             </div>
             <div class="kpi-footer-row">
               <span class="kpi-footer-label">Severity</span>
@@ -226,8 +226,8 @@
                 -1.5% vs prev
               </span>
             </div>
-            <div class="kpi-sparkline-wrap">
-              <SparklineChart variant="orange" :height="32" :points="[18, 15, 20, 16, 14, 12, 11, portfolioMetrics.totalBugs || 10]" />
+            <div class="kpi-segmented-wrap">
+              <SegmentedProgressBar :value="Math.max(0, 100 - (portfolioMetrics.totalBugs || 0) * 2)" variant="orange" height="18px" :total-segments="44" />
             </div>
             <div class="kpi-footer-row">
               <span class="kpi-footer-label">Quality Index</span>
@@ -260,7 +260,7 @@
               </span>
             </div>
             <div class="kpi-segmented-wrap">
-              <SegmentedProgressBar :value="100" variant="emerald" height="22px" :total-segments="44" />
+              <SegmentedProgressBar :value="100" variant="emerald" height="18px" :total-segments="44" />
             </div>
             <div class="kpi-footer-row">
               <span class="kpi-footer-label">Portfolio Scope</span>
@@ -292,7 +292,9 @@
                 On Schedule
               </span>
             </div>
-            <div class="progress-bar-track-sm"><div class="progress-bar-fill-sm blue" style="width: 100%"></div></div>
+            <div class="kpi-segmented-wrap">
+              <SegmentedProgressBar :value="100" variant="blue" height="18px" :total-segments="44" />
+            </div>
             <div class="kpi-footer-row">
               <span class="kpi-footer-label">Sprint Cadence</span>
               <span class="kpi-footer-val">Bi-Weekly</span>
@@ -324,8 +326,8 @@
                 -4.0% vs prev
               </span>
             </div>
-            <div class="kpi-sparkline-wrap">
-              <SparklineChart variant="negative" :height="32" :points="[25, 22, 28, 20, 18, 16, 15, portfolioMetrics.totalHighPriority || 12]" />
+            <div class="kpi-segmented-wrap">
+              <SegmentedProgressBar :value="Math.max(0, 100 - Math.round((portfolioMetrics.totalHighPriority || 0) / 2))" variant="red" height="18px" :total-segments="44" />
             </div>
             <div class="kpi-footer-row">
               <span class="kpi-footer-label">Priority Distribution</span>

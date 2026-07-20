@@ -1,10 +1,11 @@
 <template>
-  <div class="custom-select" ref="containerRef">
+  <div class="custom-select" ref="containerRef" :class="{ disabled: disabled }">
     <!-- Select Button -->
     <button
       type="button"
       class="custom-select-trigger"
-      :class="{ open: isOpen }"
+      :class="{ open: isOpen, disabled: disabled }"
+      :disabled="disabled"
       @click="toggleOpen"
     >
       <span class="selected-text">{{ selectedLabel }}</span>
@@ -15,7 +16,7 @@
 
     <!-- Options Dropdown Menu -->
     <Transition name="fade-slide">
-      <div v-if="isOpen" class="custom-select-options">
+      <div v-if="isOpen && !disabled" class="custom-select-options">
         <div
           v-for="opt in options"
           :key="opt.value"
@@ -38,7 +39,9 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 
 const props = defineProps({
   modelValue: { type: [String, Number], default: '' },
-  options: { type: Array, default: () => [] } // array of { label, value }
+  options: { type: Array, default: () => [] }, // array of { label, value }
+  disabled: { type: Boolean, default: false },
+  placeholder: { type: String, default: 'Select Option' }
 });
 
 const emit = defineEmits(['update:modelValue', 'change']);
@@ -50,14 +53,16 @@ const selectedLabel = computed(() => {
   const found = props.options.find(o => o.value === props.modelValue);
   if (found) return found.label;
   if (props.options && props.options.length > 0) return props.options[0].label;
-  return 'Select Option';
+  return props.placeholder;
 });
 
 const toggleOpen = () => {
+  if (props.disabled) return;
   isOpen.value = !isOpen.value;
 };
 
 const selectOption = (opt) => {
+  if (props.disabled) return;
   emit('update:modelValue', opt.value);
   emit('change', opt.value);
   isOpen.value = false;
@@ -107,6 +112,20 @@ onBeforeUnmount(() => {
 .custom-select-trigger:hover {
   border-color: #A7F3D0;
   background-color: #F9FAFB;
+}
+
+.custom-select-trigger.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #F3F4F6;
+  border-color: #E5E7EB;
+  color: #9CA3AF;
+  box-shadow: none;
+}
+
+.custom-select-trigger.disabled:hover {
+  border-color: #E5E7EB;
+  background-color: #F3F4F6;
 }
 
 .custom-select-trigger.open {
