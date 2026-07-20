@@ -971,7 +971,7 @@ import CircularHealthRing from '~/components/CircularHealthRing.vue';
 import SegmentedProgressBar from '~/components/SegmentedProgressBar.vue';
 import SparklineChart from '~/components/SparklineChart.vue';
 
-useHead({ title: 'Sprint Health — Sprintlytics' });
+useHead({ title: 'Sprint Health Analytics | Sprintlytics' });
 
 const route = useRoute();
 const selectedProject = ref('');

@@ -817,6 +817,8 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+useHead({ title: 'Burndown Analytics | Sprintlytics' });
+
 const route = useRoute();
 const router = useRouter();
 

@@ -353,6 +353,8 @@ definePageMeta({
   layout: false
 });
 
+useHead({ title: 'Sign In | Sprintlytics' });
+
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 

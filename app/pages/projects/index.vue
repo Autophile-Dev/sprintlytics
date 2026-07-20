@@ -56,6 +56,8 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
+useHead({ title: 'Company Projects Overview | Sprintlytics' });
+
 const router = useRouter();
 
 const { data, pending } = await useFetch('/api/projects/by-company');

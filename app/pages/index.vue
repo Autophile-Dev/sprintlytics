@@ -739,6 +739,8 @@ import PortfolioRadarChartGenZ from '~/components/PortfolioRadarChartGenZ.vue';
 import PortfolioQuickStatsGenZ from '~/components/PortfolioQuickStatsGenZ.vue';
 import SparklineChart from '~/components/SparklineChart.vue';
 
+useHead({ title: 'Executive Command Center | Sprintlytics' });
+
 const router = useRouter();
 
 const selectedPeriod = ref('daily');

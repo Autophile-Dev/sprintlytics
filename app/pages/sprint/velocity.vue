@@ -1158,6 +1158,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+useHead({ title: 'Velocity Analytics | Sprintlytics' });
+
 const route = useRoute();
 const router = useRouter();
 
@@ -2097,6 +2099,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
 .dual-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  align-items: start;
   gap: 1.5rem;
 }
 
@@ -2196,6 +2199,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
 .sprint-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  align-items: start;
   gap: 1rem;
 }
 
@@ -2276,6 +2280,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
 .sp-analytics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: start;
   gap: 1rem;
 }
 
@@ -2304,6 +2309,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
 .team-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: start;
   gap: 1rem;
 }
 
