@@ -153,7 +153,7 @@
         <div class="podium-grid">
 
           <!-- #2 Silver Podium Card -->
-          <div v-if="data.podium?.silver" class="podium-card silver-podium" @click="openMemberModal(data.podium.silver)">
+          <div v-if="data.podium?.silver" class="podium-card silver-podium" @click="openMemberProfile(data.podium.silver)">
             <div class="podium-rank-badge silver">
               <span>🥈 Rank #2</span>
             </div>
@@ -192,7 +192,7 @@
           </div>
 
           <!-- #1 Gold MVP Podium Card -->
-          <div v-if="data.podium?.gold" class="podium-card gold-podium" @click="openMemberModal(data.podium.gold)">
+          <div v-if="data.podium?.gold" class="podium-card gold-podium" @click="openMemberProfile(data.podium.gold)">
             <div class="crown-banner">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="#F59E0B" stroke="#D97706" stroke-width="1.5">
                 <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"/>
@@ -237,7 +237,7 @@
           </div>
 
           <!-- #3 Bronze Podium Card -->
-          <div v-if="data.podium?.bronze" class="podium-card bronze-podium" @click="openMemberModal(data.podium.bronze)">
+          <div v-if="data.podium?.bronze" class="podium-card bronze-podium" @click="openMemberProfile(data.podium.bronze)">
             <div class="podium-rank-badge bronze">
               <span>🥉 Rank #3</span>
             </div>
@@ -290,7 +290,7 @@
         </div>
 
         <div class="specialty-awards-grid">
-          <div v-for="award in data.specialtyAwards" :key="award.id" class="award-card-premium">
+          <div v-for="award in data.specialtyAwards" :key="award.id" class="award-card-premium" @click="openMemberProfileByName(award.winner)">
             <div class="award-header-row">
               <div class="award-badge-icon">{{ award.badge }}</div>
               <div class="award-info">
@@ -398,7 +398,7 @@
                   </td>
 
                   <!-- Engineer Info Cell -->
-                  <td>
+                  <td @click="openMemberProfile(mem)" class="clickable-cell">
                     <div class="eng-cell">
                       <div class="eng-avatar" :class="getAvatarClass(mem.rank)">
                         {{ getInitials(mem.name) }}
@@ -453,7 +453,7 @@
 
                   <!-- Actions -->
                   <td class="text-center">
-                    <button class="btn-detail" @click="openMemberModal(mem)">
+                    <button class="btn-detail primary" @click="openMemberProfile(mem)">
                       View Profile
                     </button>
                   </td>
@@ -561,13 +561,10 @@
           </ul>
         </div>
 
-        <div class="md-section">
-          <h4>⚡ Recommended Focus Areas</h4>
-          <ul class="md-list improvements">
-            <li v-for="(i, idx) in selectedMember.improvements" :key="idx">
-              💡 {{ i }}
-            </li>
-          </ul>
+        <div class="modal-footer-nav">
+          <button class="action-btn primary-btn" style="width:100%;justify-content:center;" @click="openMemberProfile(selectedMember)">
+            Open Full Engineer Profile Page →
+          </button>
         </div>
       </div>
     </AppModal>
@@ -612,6 +609,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 // ── State Variables ────────────────────────────────────────────────────────
 const selectedPeriod  = ref('daily');
@@ -721,6 +721,20 @@ const toggleSort = (col) => {
     sortBy.value = col;
     sortDesc.value = true;
   }
+};
+
+// ── Navigation to Full Profile Page ────────────────────────────────────────
+const openMemberProfile = (member) => {
+  if (!member) return;
+  const targetId = member.id || member.name;
+  router.push(`/team/member/${encodeURIComponent(targetId)}`);
+};
+
+const openMemberProfileByName = (name) => {
+  if (!name) return;
+  const found = data.value?.leaderboard?.find(m => m.name === name);
+  const targetId = found ? found.id : name;
+  router.push(`/team/member/${encodeURIComponent(targetId)}`);
 };
 
 // ── Modals & Actions ───────────────────────────────────────────────────────
@@ -1283,6 +1297,13 @@ onMounted(() => {
   padding: 1.1rem;
   border: 1px solid #E5E7EB;
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.award-card-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .award-header-row {
@@ -1472,6 +1493,15 @@ onMounted(() => {
   background-color: #F9FAFB;
 }
 
+.clickable-cell {
+  cursor: pointer;
+}
+
+.clickable-cell:hover .eng-name {
+  color: #2563EB;
+  text-decoration: underline;
+}
+
 .rank-cell {
   font-weight: 700;
   font-size: 0.9rem;
@@ -1515,7 +1545,7 @@ onMounted(() => {
 .bronze-avatar { background: linear-gradient(135deg, #F97316 0%, #C2410C 100%); }
 .default-avatar { background: #3B82F6; }
 
-.eng-name { font-weight: 700; color: #111827; }
+.eng-name { font-weight: 700; color: #111827; transition: color 0.15s ease; }
 .eng-meta { font-size: 0.72rem; color: #6B7280; }
 .co-name { font-weight: 600; color: #4B5563; }
 
@@ -1590,19 +1620,22 @@ onMounted(() => {
 .status-at-risk { background: #FEE2E2; color: #991B1B; }
 
 .btn-detail {
-  padding: 0.3rem 0.6rem;
-  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  background: #ffffff;
-  color: #2563EB;
-  border: 1px solid #BFDBFE;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
+  border: none;
 }
 
-.btn-detail:hover {
-  background: #EFF6FF;
+.btn-detail.primary {
+  background: #2563EB;
+  color: #ffffff;
+}
+
+.btn-detail.primary:hover {
+  background: #1D4ED8;
 }
 
 /* ── Section 5: AI Insights Card ── */
@@ -1770,6 +1803,8 @@ onMounted(() => {
 .md-section h4 { font-size: 0.85rem; font-weight: 700; color: #111827; margin: 0 0 0.4rem 0; }
 .md-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
 .md-list li { font-size: 0.8rem; color: #374151; }
+
+.modal-footer-nav { margin-top: 0.5rem; }
 
 .export-modal-body { display: flex; flex-direction: column; gap: 1rem; }
 .export-desc { font-size: 0.85rem; color: #4B5563; margin: 0; }

@@ -28,10 +28,17 @@ export default defineEventHandler(async (event) => {
     if (selectedProject !== 'ALL') {
       dbFilter.companyName = { $regex: new RegExp(`^${selectedProject.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') };
     }
-    const records = await ProjectPerformance.find(dbFilter)
+    let records = await ProjectPerformance.find(dbFilter)
       .sort({ generatedAt: -1 })
       .limit(range * 5)
       .lean();
+
+    if (!records.length) {
+      records = await ProjectPerformance.find({})
+        .sort({ generatedAt: -1 })
+        .limit(30)
+        .lean();
+    }
 
     // ─── 3. Aggregate Team Members across records ──────────────────────────────
     const memberMap = new Map();
