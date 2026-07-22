@@ -48,10 +48,13 @@
                 class="bar-col-fill"
                 :style="{
                   height: `${(p.val / maxAxisVal) * 100}%`,
-                  background: hovered === i ? p.color : 'rgba(107,114,128,0.18)',
-                  boxShadow: hovered === i ? `0 -4px 16px ${p.color}55` : 'none'
+                  background: p.color,
+                  opacity: hovered === null || hovered === i ? 1 : 0.8,
+                  boxShadow: hovered === i ? `0 -4px 16px ${p.color}88` : `0 2px 8px ${p.color}33`
                 }"
-              ></div>
+              >
+                <span class="bar-val-text">{{ p.val }}%</span>
+              </div>
             </div>
 
             <!-- X-Axis Name -->
@@ -216,15 +219,28 @@ const yAxis = computed(() => {
   border-radius: 8px 8px 0 0;
   transition: height 0.4s cubic-bezier(.4,0,.2,1), background 0.2s, box-shadow 0.2s;
   min-height: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+
+.bar-val-text {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #000000;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .x-label {
   position: absolute; bottom: 0;
-  font-size: 0.68rem; font-weight: 500; color: #9CA3AF;
+  font-size: 0.72rem; font-weight: 800; color: #000000;
   transition: color 0.15s, font-weight 0.15s;
   white-space: nowrap;
 }
-.x-label.active { color: #111827; font-weight: 700; }
+.x-label.active { color: #000000; font-weight: 900; }
 
 .bar-legend-chips {
   display: flex; flex-wrap: wrap; gap: 0.5rem;

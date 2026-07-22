@@ -654,7 +654,7 @@
                 <path v-if="completionChartPts.length > 1" :d="completionAreaPath" fill="url(#cg1)"/>
                 <path v-if="completionChartPts.length > 1" :d="completionLinePath" fill="none" stroke="#059669" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <circle v-for="(pt, i) in completionChartPts" :key="'cp'+i" :cx="pt.x" :cy="pt.y" r="5.5" fill="#059669" stroke="#ffffff" stroke-width="2.5"/>
-                <text v-for="(pt, i) in completionChartPts" :key="'cl'+i" :x="pt.x" y="308" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="600">{{ pt.label }}</text>
+                <text v-for="(pt, i) in completionChartPts" :key="'cl'+i" :x="pt.x" y="300" text-anchor="end" font-size="10" fill="#4B5563" font-weight="600" :transform="`rotate(-25, ${pt.x}, 300)`">{{ pt.label }}</text>
                 <line v-if="hoveredCompletionIdx !== null" :x1="completionChartPts[hoveredCompletionIdx]?.x" y1="20" :x2="completionChartPts[hoveredCompletionIdx]?.x" y2="280" stroke="#059669" stroke-width="2" stroke-dasharray="4,4"/>
               </svg>
               <div v-if="hoveredCompletionIdx !== null && completionChartPts[hoveredCompletionIdx]" class="chart-tooltip-popup" :style="completionTooltipStyle">
@@ -687,7 +687,7 @@
                 <path v-if="velocityChartPts.length > 1" :d="velocityAreaPath" fill="url(#vg1)"/>
                 <path v-if="velocityChartPts.length > 1" :d="velocityLinePath" fill="none" stroke="#7C3AED" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <circle v-for="(pt, i) in velocityChartPts" :key="'vp'+i" :cx="pt.x" :cy="pt.y" r="5.5" fill="#7C3AED" stroke="#ffffff" stroke-width="2.5"/>
-                <text v-for="(pt, i) in velocityChartPts" :key="'vl'+i" :x="pt.x" y="308" text-anchor="middle" font-size="10" fill="#6B7280" font-weight="600">{{ pt.label }}</text>
+                <text v-for="(pt, i) in velocityChartPts" :key="'vl'+i" :x="pt.x" y="300" text-anchor="end" font-size="10" fill="#4B5563" font-weight="600" :transform="`rotate(-25, ${pt.x}, 300)`">{{ pt.label }}</text>
                 <line v-if="hoveredVelocityIdx !== null" :x1="velocityChartPts[hoveredVelocityIdx]?.x" y1="20" :x2="velocityChartPts[hoveredVelocityIdx]?.x" y2="280" stroke="#7C3AED" stroke-width="2" stroke-dasharray="4,4"/>
               </svg>
               <div v-if="hoveredVelocityIdx !== null && velocityChartPts[hoveredVelocityIdx]" class="chart-tooltip-popup" :style="velocityTooltipStyle">

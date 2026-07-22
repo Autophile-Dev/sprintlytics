@@ -270,8 +270,8 @@ const getBarHeight = (val) => {
   position: absolute;
   bottom: 0;
   font-size: 0.75rem;
-  font-weight: 600;
-  color: #6B7280;
+  font-weight: 800;
+  color: #000000;
   white-space: nowrap;
 }
 

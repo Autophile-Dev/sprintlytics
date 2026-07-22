@@ -247,13 +247,14 @@
                   v-for="(pt, idx) in trendPoints"
                   :key="'xt-'+idx"
                   :x="pt.x"
-                  :y="chartHeight - 10"
-                  text-anchor="middle"
-                  fill="#6B7280"
-                  font-size="11"
+                  :y="chartHeight - 20"
+                  text-anchor="end"
+                  fill="#4B5563"
+                  font-size="10"
                   font-weight="600"
+                  :transform="`rotate(-30, ${pt.x}, ${chartHeight - 20})`"
                 >
-                  {{ pt.sprint }}
+                  {{ formatAxisLabel(pt.sprint) }}
                 </text>
               </g>
             </svg>
@@ -899,10 +900,22 @@ const kpiTrendHistory = computed(() => data.value?.kpiTrendHistory || []);
 const statsSummary = computed(() => data.value?.statsSummary || {});
 const aiIntelligence = computed(() => data.value?.aiIntelligence || { keyAchievements: [], deliveryRisks: [], recommendations: [], forecast: {} });
 
+const formatAxisLabel = (str) => {
+  if (!str) return '';
+  let s = String(str);
+  if (s.length > 14) {
+    s = s.replace(/Sprint\s+/i, 'S');
+  }
+  if (s.length > 16) {
+    s = s.slice(0, 14) + '…';
+  }
+  return s;
+};
+
 // SVG Trend Line Chart Coordinates
 const chartWidth = 750;
-const chartHeight = 220;
-const margin = { top: 20, right: 30, bottom: 40, left: 55 };
+const chartHeight = 250;
+const margin = { top: 20, right: 30, bottom: 65, left: 55 };
 
 const yGridTicks = computed(() => [
   { val: 100, y: margin.top },
@@ -1282,11 +1295,29 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
   color: #6B7280;
 }
 
-/* Executive KPI Cards Grid */
+/* Executive KPI Cards Grid (4 per row) */
 .exec-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .exec-kpi-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .kpi-card-premium {
@@ -1305,12 +1336,19 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .kpi-title-with-icon {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .kpi-icon-badge {
@@ -1320,6 +1358,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .kpi-icon-badge.emerald { background: #ECFDF5; color: #059669; }
@@ -1332,18 +1371,29 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
   font-size: 0.8rem;
   font-weight: 600;
   color: #4B5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kpi-value-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .kpi-value {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #111827;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .trend-badge {
@@ -1351,9 +1401,11 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
   font-weight: 700;
   padding: 0.15rem 0.45rem;
   border-radius: 6px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.2rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .trend-badge.positive { background: #ECFDF5; color: #059669; }

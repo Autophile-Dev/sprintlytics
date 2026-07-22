@@ -233,13 +233,14 @@
                   v-for="(pt, idx) in trendPoints"
                   :key="'xt-'+idx"
                   :x="pt.x"
-                  :y="chartHeight - 10"
-                  text-anchor="middle"
-                  fill="#6B7280"
-                  font-size="11"
+                  :y="chartHeight - 20"
+                  text-anchor="end"
+                  fill="#4B5563"
+                  font-size="10"
                   font-weight="600"
+                  :transform="`rotate(-30, ${pt.x}, ${chartHeight - 20})`"
                 >
-                  {{ pt.sprint }}
+                  {{ formatAxisLabel(pt.sprint) }}
                 </text>
               </g>
             </svg>
@@ -918,12 +919,13 @@
                 :key="'flbl-'+idx"
                 :x="fp.x"
                 y="190"
-                text-anchor="middle"
-                fill="#6B7280"
+                text-anchor="end"
+                fill="#4B5563"
                 font-size="10"
                 font-weight="600"
+                :transform="`rotate(-25, ${fp.x}, 190)`"
               >
-                {{ fp.sprintName.replace(' (AI)', '') }}
+                {{ formatAxisLabel(fp.sprintName.replace(' (AI)', '')) }}
               </text>
             </svg>
           </div>
@@ -1317,10 +1319,22 @@ const aiIntelligence = computed(() => data.value?.aiIntelligence || { keyAchieve
 const deliveryEfficiency = computed(() => data.value?.deliveryEfficiency || []);
 const statsSummary = computed(() => data.value?.statsSummary || {});
 
+const formatAxisLabel = (str) => {
+  if (!str) return '';
+  let s = String(str);
+  if (s.length > 14) {
+    s = s.replace(/Sprint\s+/i, 'S');
+  }
+  if (s.length > 16) {
+    s = s.slice(0, 14) + '…';
+  }
+  return s;
+};
+
 // SVG Line Chart Dimensions & Coordinate Mapping
 const chartWidth = 750;
-const chartHeight = 220;
-const margin = { top: 20, right: 30, bottom: 40, left: 55 };
+const chartHeight = 250;
+const margin = { top: 20, right: 30, bottom: 65, left: 55 };
 
 const yGridTicks = computed(() => {
   const max = 60;
