@@ -324,11 +324,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const riskId = route.params.id || 'RSK-101';
+const riskId = computed(() => String(route.params.id || 'RSK-101'));
 
 const pending = ref(true);
 const riskDetail = ref(null);
@@ -419,23 +419,25 @@ const tooltipStyle = computed(() => {
 const fetchRiskDetail = async () => {
   pending.value = true;
   try {
+    const targetId = riskId.value;
     const res = await $fetch('/api/risks', {
       query: { project: 'ALL', severity: 'ALL', period: 'daily' }
     });
 
     if (res && res.success) {
-      const match = (res.riskItems || []).find(r => r.id.toLowerCase() === riskId.toLowerCase()) || res.riskItems?.[0];
+      const match = (res.riskItems || []).find(r => r.id.toLowerCase() === targetId.toLowerCase()) || res.riskItems?.[0];
       const proj = match?.project || 'FLEXA ERP';
       const sev = match?.severity || 'High';
+      const currentId = match?.id || targetId;
 
       riskDetail.value = {
-        id: match?.id || riskId,
-        title: match?.title || 'High-priority delivery blocker halting release candidate',
+        id: currentId,
+        title: match?.title || `Risk & Blocker Item (${currentId})`,
         project: proj,
         category: match?.category || 'Technical Blocker',
         severity: sev,
         status: match?.status || 'Active',
-        affected: match?.affected || 'Muhammad Bilal',
+        affected: match?.affected || 'Engineering Team',
         impact: match?.impact || 'Core database connection latency spiking release cycle by 18%',
         action: match?.action || 'Re-assign blocked tickets and initiate daily escalation sync',
         slaTarget: '24 Hours',
@@ -468,7 +470,7 @@ const fetchRiskDetail = async () => {
           'Conduct immediate architectural review with backend squad leads'
         ],
         linkedTickets: [
-          { key: 'FLX-1082', summary: 'API latency bottleneck on tenant auth query', assignee: 'Muhammad Bilal', priority: 'High', sp: 5, status: 'Blocked', sla: '2 Hours Overdue' },
+          { key: 'FLX-1082', summary: 'API latency bottleneck on tenant auth query', assignee: match?.affected || 'Muhammad Bilal', priority: 'High', sp: 5, status: 'Blocked', sla: '2 Hours Overdue' },
           { key: 'FLX-1094', summary: 'Database connection pool max cap reached', assignee: 'Faisal Syslab', priority: 'Critical', sp: 8, status: 'In Progress', sla: 'SLA Active' },
           { key: 'FLX-1102', summary: 'Frontend state machine deadlock on timeout', assignee: 'Ihtesham Mansoor', priority: 'Medium', sp: 3, status: 'Done', sla: 'Resolved' }
         ]
@@ -511,6 +513,10 @@ const showToast = (message, type = 'success') => {
     toast.value.show = false;
   }, 3500);
 };
+
+watch(riskId, () => {
+  fetchRiskDetail();
+});
 
 onMounted(() => {
   fetchRiskDetail();

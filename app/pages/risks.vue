@@ -244,7 +244,13 @@
           </div>
 
           <div class="risk-heatmap-list">
-            <div v-for="proj in projectRiskHeatmap" :key="proj.companyName" class="heatmap-item">
+            <div
+              v-for="proj in projectRiskHeatmap"
+              :key="proj.companyName"
+              class="heatmap-item clickable-heatmap-item"
+              @click="selectedProject = proj.companyName; fetchRiskData()"
+              title="Click to filter Risk Register by this project"
+            >
               <div class="hm-header">
                 <div class="hm-title-wrap">
                   <span class="hm-name">{{ proj.companyName }}</span>
@@ -344,7 +350,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="risk in filteredRiskItems" :key="risk.id">
+                <tr v-for="risk in filteredRiskItems" :key="risk.id" class="clickable-row" @click="goToRiskDetail(risk.id)">
                   <td class="font-mono font-bold">{{ risk.id }}</td>
                   <td class="font-semibold text-gray-900">{{ risk.project }}</td>
                   <td>
@@ -363,10 +369,16 @@
                     </span>
                   </td>
                   <td style="text-align:left">
-                    <button class="btn-detail primary" @click.stop="goToRiskDetail(risk.id)">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                      View Details
-                    </button>
+                    <div class="action-btn-group">
+                      <button class="btn-detail primary" @click.stop="goToRiskDetail(risk.id)" title="Open Full Risk Analysis Page">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Full Detail
+                      </button>
+                      <button class="btn-detail secondary" @click.stop="openRiskDetailModal(risk)" title="Quick Modal View">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        Quick View
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 <tr v-if="!filteredRiskItems.length">
@@ -1075,17 +1087,43 @@ onMounted(() => {
 .status-balanced { background: #ECFDF5; color: #059669; }
 .status-at-risk { background: #FEE2E2; color: #EF4444; }
 
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.clickable-row:hover {
+  background-color: #F9FAFB;
+}
+
+.clickable-heatmap-item {
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: 10px;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+.clickable-heatmap-item:hover {
+  background-color: #F9FAFB;
+  transform: translateX(3px);
+}
+
+.action-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .btn-detail {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.7rem;
+  padding: 0.35rem 0.65rem;
   font-size: 0.75rem;
   font-weight: 600;
   border-radius: 6px;
   border: none;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .btn-detail.primary {
@@ -1096,6 +1134,16 @@ onMounted(() => {
 .btn-detail.primary:hover {
   background: #059669;
   color: #ffffff;
+}
+
+.btn-detail.secondary {
+  background: #F3F4F6;
+  color: #4B5563;
+  border: 1px solid #E5E7EB;
+}
+.btn-detail.secondary:hover {
+  background: #E5E7EB;
+  color: #111827;
 }
 
 /* Modals */

@@ -770,7 +770,7 @@
           </div>
         </div>
         <div class="risk-grid">
-          <div v-for="r in riskCards" :key="r.name" class="risk-card" :class="r.level.toLowerCase()">
+          <div v-for="r in riskCards" :key="r.name" class="risk-card clickable-risk-card" :class="r.level.toLowerCase()" @click="navigateTo('/risks')" title="Click to view detailed Risk Monitor">
             <div class="rc-header">
               <div class="rc-icon" :class="r.level.toLowerCase()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" v-html="r.icon"></svg>
@@ -807,11 +807,11 @@
             </div>
             <div class="ai-col" v-if="analysis.risks?.length">
               <div class="ai-col-hdr risk"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>Sprint Risks</div>
-              <ul class="ai-list"><li v-for="(r,i) in analysis.risks" :key="i" class="ai-item risk">{{ r }}</li></ul>
+              <ul class="ai-list"><li v-for="(r,i) in analysis.risks" :key="i" class="ai-item risk clickable-ai-item" @click="navigateTo('/risks')" title="Click to view Risk Monitor">{{ r }}</li></ul>
             </div>
             <div class="ai-col" v-if="analysis.blockers?.length">
               <div class="ai-col-hdr blocker"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Active Blockers</div>
-              <ul class="ai-list"><li v-for="(b,i) in analysis.blockers" :key="i" class="ai-item blocker">{{ b }}</li></ul>
+              <ul class="ai-list"><li v-for="(b,i) in analysis.blockers" :key="i" class="ai-item blocker clickable-ai-item" @click="navigateTo('/risks')" title="Click to view Risk Monitor">{{ b }}</li></ul>
             </div>
             <div class="ai-col" v-if="analysis.recommendations?.length">
               <div class="ai-col-hdr recommendation"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Recommendations</div>
@@ -1960,23 +1960,21 @@ const shareReport = () => {
 .rep-box ul { margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: #374151; }
 .rep-box li { margin-bottom: 0.3rem; }
 
-.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.2s ease; }
-.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
+.clickable-risk-card {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.clickable-risk-card:hover {
+  transform: translateY(-2px);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 20px 0px;
+}
 
-/* ── Print Media Styles ── */
-@media print {
-  .sh-topbar, .quick-actions-bar, .sh-modal-backdrop, .sh-toast, nav, header, sidebar {
-    display: none !important;
-  }
-  body, .sprint-health-page {
-    background: #fff !important;
-    gap: 1.5rem !important;
-    padding: 0 !important;
-  }
-  .card, .hero-card, .kpi-card-premium, .priority-dist-card, .quality-card, .team-stat-tile, .member-card, .risk-card {
-    box-shadow: none !important;
-    border: 1px solid #E5E7EB !important;
-    page-break-inside: avoid;
-  }
+.clickable-ai-item {
+  cursor: pointer;
+  transition: color 0.15s ease, text-decoration 0.15s ease;
+}
+.clickable-ai-item:hover {
+  text-decoration: underline;
+  opacity: 0.9;
 }
 </style>

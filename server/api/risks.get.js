@@ -73,9 +73,16 @@ export default defineEventHandler(async (event) => {
     let atRiskDevSet = new Set();
     let aggregatedRiskItems = [];
 
+    // Create a deterministic index map for all projects
+    const companyIndexMap = {};
+    projectsList.forEach((p, idx) => {
+      companyIndexMap[p] = idx;
+    });
+
     activeSnapshots.forEach((snap, snapIdx) => {
       const kpis = snap.kpis || {};
       const comp = snap.companyName || 'General Project';
+      const projIdx = companyIndexMap[comp] !== undefined ? companyIndexMap[comp] : snapIdx;
 
       totalBlocked += (kpis.blocked || 0);
       totalOverdue += (kpis.overdue || 0);
@@ -98,7 +105,7 @@ export default defineEventHandler(async (event) => {
       const dbBlockers = snap.analysis?.blockers || [];
 
       dbRisks.forEach((rText, rIdx) => {
-        const idNum = (snapIdx * 10) + rIdx + 101;
+        const idNum = (projIdx * 10) + rIdx + 101;
         const lower = rText.toLowerCase();
         const sev = lower.includes('critical') || lower.includes('delay') || lower.includes('severe') ? 'Critical'
                   : lower.includes('high') || lower.includes('blocked') || lower.includes('risk') ? 'High'
@@ -118,7 +125,7 @@ export default defineEventHandler(async (event) => {
       });
 
       dbBlockers.forEach((bText, bIdx) => {
-        const idNum = (snapIdx * 10) + bIdx + 501;
+        const idNum = (projIdx * 10) + bIdx + 501;
         aggregatedRiskItems.push({
           id: `BLK-${idNum}`,
           project: comp,
@@ -136,7 +143,7 @@ export default defineEventHandler(async (event) => {
       if (!dbRisks.length && !dbBlockers.length) {
         if (kpis.blocked > 0) {
           aggregatedRiskItems.push({
-            id: `BLK-${snapIdx + 201}`,
+            id: `BLK-${projIdx * 10 + 201}`,
             project: comp,
             category: 'Technical Blocker',
             severity: 'Critical',
@@ -149,7 +156,7 @@ export default defineEventHandler(async (event) => {
         }
         if (kpis.overdue > 0) {
           aggregatedRiskItems.push({
-            id: `RSK-${snapIdx + 301}`,
+            id: `RSK-${projIdx * 10 + 301}`,
             project: comp,
             category: 'Overdue Tasks',
             severity: 'High',
@@ -162,7 +169,7 @@ export default defineEventHandler(async (event) => {
         }
         if (kpis.bugCount > 3) {
           aggregatedRiskItems.push({
-            id: `BUG-${snapIdx + 401}`,
+            id: `BUG-${projIdx * 10 + 401}`,
             project: comp,
             category: 'Quality & Bugs',
             severity: 'Medium',
