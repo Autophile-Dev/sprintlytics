@@ -592,7 +592,7 @@
         </div>
 
         <div class="team-cards-grid">
-          <div v-for="member in teamPerformance" :key="'tm-'+member.name" class="team-card">
+          <div v-for="member in teamPerformance" :key="'tm-'+member.name" class="team-card" style="cursor: pointer" @click="openMemberProfile(member)">
             <div class="tc-header">
               <div
                 class="tc-avatar-initials"
@@ -1127,8 +1127,14 @@
         <div class="modal-body">
           <p>Download comprehensive Velocity &amp; Capacity Report for <strong>{{ selectedProject }}</strong>.</p>
           <div class="report-options">
-            <button class="report-opt-btn" @click="downloadReport('excel')">📊 Download Excel / CSV</button>
-            <button class="report-opt-btn" @click="downloadReport('pdf')">📄 Print / Export PDF</button>
+            <button class="report-opt-btn" @click="downloadReport('excel')" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Download Excel / CSV
+            </button>
+            <button class="report-opt-btn" @click="downloadReport('pdf')" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Print / Export PDF
+            </button>
           </div>
         </div>
       </div>
@@ -1162,6 +1168,13 @@ useHead({ title: 'Velocity Analytics | Sprintlytics' });
 
 const route = useRoute();
 const router = useRouter();
+
+const openMemberProfile = (member) => {
+  if (!member) return;
+  const proj = selectedProject.value !== 'ALL' ? selectedProject.value : '';
+  const targetId = member.id || (proj ? `${proj}__${member.email || member.name}` : member.email || member.name);
+  router.push(`/team/member/${encodeURIComponent(targetId)}`);
+};
 
 // State
 const selectedProject = ref(route.query.project || 'ALL');
@@ -1874,11 +1887,29 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
   color: #6B7280;
 }
 
-/* Executive KPI Cards Grid */
+/* Executive KPI Cards Grid (4 per row) */
 .exec-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .exec-kpi-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .kpi-card-premium {
@@ -1897,12 +1928,19 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .kpi-title-with-icon {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .kpi-icon-badge {
@@ -1912,6 +1950,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .kpi-icon-badge.emerald { background: #ECFDF5; color: #059669; }
@@ -1924,12 +1963,41 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
   font-size: 0.8rem;
   font-weight: 600;
   color: #4B5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kpi-value-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.kpi-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.trend-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .kpi-value {

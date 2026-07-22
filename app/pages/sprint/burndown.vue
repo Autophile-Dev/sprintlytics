@@ -1250,8 +1250,26 @@ const exportCSV = () => showToast('Exported burndown data to CSV');
 
 .exec-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .exec-kpi-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .kpi-card-premium {
@@ -1266,8 +1284,8 @@ const exportCSV = () => showToast('Exported burndown data to CSV');
   box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
 }
 
-.kpi-header-row { display: flex; align-items: center; justify-content: space-between; }
-.kpi-title-with-icon { display: flex; align-items: center; gap: 0.5rem; }
+.kpi-header-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; white-space: nowrap; min-width: 0; }
+.kpi-title-with-icon { display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
 .kpi-icon-badge {
   width: 28px;
@@ -1276,6 +1294,7 @@ const exportCSV = () => showToast('Exported burndown data to CSV');
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .kpi-icon-badge.emerald { background: #ECFDF5; color: #059669; }
@@ -1284,18 +1303,20 @@ const exportCSV = () => showToast('Exported burndown data to CSV');
 .kpi-icon-badge.orange { background: #FFF7ED; color: #F97316; }
 .kpi-icon-badge.red { background: #FEF2F2; color: #EF4444; }
 
-.kpi-name { font-size: 0.8rem; font-weight: 600; color: #4B5563; }
-.kpi-value-row { display: flex; align-items: baseline; justify-content: space-between; }
-.kpi-value { font-size: 1.4rem; font-weight: 700; color: #111827; }
+.kpi-name { font-size: 0.8rem; font-weight: 600; color: #4B5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-value-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; white-space: nowrap; min-width: 0; }
+.kpi-value { font-size: 1.35rem; font-weight: 700; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
 .trend-badge {
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.15rem 0.45rem;
   border-radius: 6px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.2rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .trend-badge.positive { background: #ECFDF5; color: #059669; }

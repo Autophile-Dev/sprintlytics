@@ -155,7 +155,7 @@
           <!-- #2 Silver Podium Card -->
           <div v-if="data.podium?.silver" class="podium-card silver-podium" @click="openMemberProfile(data.podium.silver)">
             <div class="podium-rank-badge silver">
-              <span>🥈 Rank #2</span>
+              <span>Rank #2</span>
             </div>
             <div class="podium-avatar-wrapper silver">
               <div class="podium-avatar">{{ getInitials(data.podium.silver.name) }}</div>
@@ -185,8 +185,8 @@
             </div>
 
             <div class="podium-tags">
-              <span class="p-tag" v-for="(s, idx) in (data.podium.silver.strengths || []).slice(0, 2)" :key="idx">
-                ✓ {{ s }}
+              <span class="p-tag" v-for="(s, idx) in (data.podium.silver.strengths || []).slice(0, 2)" :key="idx" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> {{ s }}
               </span>
             </div>
           </div>
@@ -200,7 +200,7 @@
               <span>SPRINT MVP #1</span>
             </div>
             <div class="podium-rank-badge gold">
-              <span>👑 Gold Champion</span>
+              <span>Gold Champion</span>
             </div>
             <div class="podium-avatar-wrapper gold">
               <div class="podium-avatar">{{ getInitials(data.podium.gold.name) }}</div>
@@ -230,8 +230,8 @@
             </div>
 
             <div class="podium-tags">
-              <span class="p-tag gold-tag" v-for="(s, idx) in (data.podium.gold.strengths || []).slice(0, 2)" :key="idx">
-                🏆 {{ s }}
+              <span class="p-tag gold-tag" v-for="(s, idx) in (data.podium.gold.strengths || []).slice(0, 2)" :key="idx" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> {{ s }}
               </span>
             </div>
           </div>
@@ -239,7 +239,7 @@
           <!-- #3 Bronze Podium Card -->
           <div v-if="data.podium?.bronze" class="podium-card bronze-podium" @click="openMemberProfile(data.podium.bronze)">
             <div class="podium-rank-badge bronze">
-              <span>🥉 Rank #3</span>
+              <span>Rank #3</span>
             </div>
             <div class="podium-avatar-wrapper bronze">
               <div class="podium-avatar">{{ getInitials(data.podium.bronze.name) }}</div>
@@ -269,8 +269,8 @@
             </div>
 
             <div class="podium-tags">
-              <span class="p-tag" v-for="(s, idx) in (data.podium.bronze.strengths || []).slice(0, 2)" :key="idx">
-                ✓ {{ s }}
+              <span class="p-tag" v-for="(s, idx) in (data.podium.bronze.strengths || []).slice(0, 2)" :key="idx" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> {{ s }}
               </span>
             </div>
           </div>
@@ -390,9 +390,9 @@
                   <!-- Rank Cell -->
                   <td>
                     <div class="rank-cell">
-                      <span v-if="mem.rank === 1" class="rank-medal gold">👑 #1</span>
-                      <span v-else-if="mem.rank === 2" class="rank-medal silver">🥈 #2</span>
-                      <span v-else-if="mem.rank === 3" class="rank-medal bronze">🥉 #3</span>
+                      <span v-if="mem.rank === 1" class="rank-medal gold">#1</span>
+                      <span v-else-if="mem.rank === 2" class="rank-medal silver">#2</span>
+                      <span v-else-if="mem.rank === 3" class="rank-medal bronze">#3</span>
                       <span v-else class="rank-num">#{{ mem.rank }}</span>
                     </div>
                   </td>
@@ -453,8 +453,12 @@
 
                   <!-- Actions -->
                   <td class="text-center">
-                    <button class="btn-detail primary" @click="openMemberProfile(mem)">
-                      View Profile
+                    <button class="btn-detail primary" @click="openMemberProfile(mem)" title="View Details" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                      View Details
                     </button>
                   </td>
 
@@ -481,12 +485,12 @@
           </div>
 
           <div class="ai-headline-box">
-            <h4>💡 {{ data.aiSummary?.headline }}</h4>
+            <h4>{{ data.aiSummary?.headline }}</h4>
           </div>
 
           <div class="ai-insights-grid">
             <div class="ai-col">
-              <h5>🏆 Key Accomplishments</h5>
+              <h5>Key Accomplishments</h5>
               <ul>
                 <li v-for="(h, idx) in (data.aiSummary?.highlights || [])" :key="idx">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -496,7 +500,7 @@
             </div>
 
             <div class="ai-col">
-              <h5>🎯 AI Recommendations</h5>
+              <h5>AI Recommendations</h5>
               <ul>
                 <li v-for="(r, idx) in (data.aiSummary?.recommendations || [])" :key="idx">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -553,10 +557,11 @@
         </div>
 
         <div class="md-section">
-          <h4>🏆 Identified Core Strengths</h4>
+          <h4>Identified Core Strengths</h4>
           <ul class="md-list strengths">
-            <li v-for="(s, idx) in selectedMember.strengths" :key="idx">
-              ✓ {{ s }}
+            <li v-for="(s, idx) in selectedMember.strengths" :key="idx" style="display: flex; align-items: center; gap: 0.35rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>{{ s }}</span>
             </li>
           </ul>
         </div>
@@ -813,21 +818,25 @@ onMounted(() => {
 <style scoped>
 /* ── Page Layout ── */
 .leaderboard-analytics-page {
-  padding: 1.5rem;
-  background-color: #F9FAFB;
-  min-height: 100vh;
-  color: #111827;
-  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 3rem;
 }
 
 /* ── Global Topbar Header ── */
 .va-topbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+  background: #ffffff;
+  padding: 1.25rem 1.5rem;
+  border-radius: 14px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  border: none;
+  outline: none;
 }
 
 .topbar-left {
@@ -851,17 +860,18 @@ onMounted(() => {
 }
 
 .ai-live-tag {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.25rem 0.6rem;
-  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-  color: #4F46E5;
-  font-size: 0.68rem;
+  background: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
+  font-size: 0.72rem;
   font-weight: 700;
-  border-radius: 9999px;
-  border: 1px solid #C7D2FE;
-  letter-spacing: 0.04em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .page-main-subtitle {
@@ -883,11 +893,11 @@ onMounted(() => {
   background: #F3F4F6;
   padding: 3px;
   border-radius: 8px;
-  border: 1px solid #E5E7EB;
+  gap: 2px;
 }
 
 .pill-btn, .range-btn, .t-pill-btn {
-  padding: 0.35rem 0.75rem;
+  padding: 0.4rem 0.8rem;
   font-size: 0.78rem;
   font-weight: 600;
   color: #4B5563;
@@ -895,40 +905,39 @@ onMounted(() => {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .pill-btn.active, .range-btn.active, .t-pill-btn.active {
   background: #ffffff;
-  color: #111827;
+  color: #059669;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .gen-date-badge {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.75rem;
-  background: #ffffff;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6B7280;
+  background: #F9FAFB;
   border: 1px solid #E5E7EB;
+  padding: 0.45rem 0.75rem;
   border-radius: 8px;
-  font-size: 0.78rem;
-  color: #4B5563;
-  font-weight: 500;
 }
 
 .icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
   background: #ffffff;
   border: 1px solid #E5E7EB;
   border-radius: 8px;
+  padding: 0.5rem;
   cursor: pointer;
   color: #4B5563;
-  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .icon-btn:hover {
@@ -947,24 +956,26 @@ onMounted(() => {
 .action-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.82rem;
-  font-weight: 600;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
   border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
-  border: none;
+  transition: all 0.2s ease;
+  border: 1px solid #E5E7EB;
+  background: #ffffff;
+  color: #374151;
 }
 
-.primary-btn {
-  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+.action-btn.primary-btn {
+  background: #059669;
   color: #ffffff;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  border-color: #059669;
 }
 
-.primary-btn:hover {
-  background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+.action-btn.primary-btn:hover {
+  background: #047857;
 }
 
 .secondary-btn {
@@ -977,7 +988,7 @@ onMounted(() => {
   background: #F3F4F6;
 }
 
-/* ── Toast ── */
+/* ── Toast Notification ── */
 .toast-notification {
   position: fixed;
   top: 1.5rem;
@@ -994,116 +1005,162 @@ onMounted(() => {
   color: #ffffff;
 }
 
-.toast-notification.success { background: #10B981; }
+.toast-notification.success { background: #059669; }
 .toast-notification.error { background: #EF4444; }
 
 .toast-fade-enter-active, .toast-fade-leave-active { transition: all 0.3s ease; }
 .toast-fade-enter-from, .toast-fade-leave-to { opacity: 0; transform: translateY(-10px); }
 
-/* ── Section Container ── */
+/* ── Section Containers & Cards ── */
 .section-container {
-  margin-bottom: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .section-header {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .section-title {
   font-size: 1.1rem;
   font-weight: 700;
   color: #111827;
-  margin: 0 0 0.2rem 0;
+  margin: 0;
 }
 
 .sec-subtitle {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: #6B7280;
 }
 
-/* ── Executive 8 KPI Cards Grid ── */
+/* ── Executive 8 KPI Cards Grid (4 per row) ── */
 .exec-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .exec-kpi-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .kpi-card-premium {
   background: #ffffff;
+  border: none;
+  outline: none;
   border-radius: 12px;
-  padding: 1.1rem;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .kpi-card-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 20px 0px;
 }
 
 .kpi-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
+  gap: 0.5rem;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .kpi-title-with-icon {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .kpi-icon-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  flex-shrink: 0;
 }
 
+.kpi-icon-badge.emerald { background: #ECFDF5; color: #059669; }
 .kpi-icon-badge.blue { background: #EFF6FF; color: #2563EB; }
-.kpi-icon-badge.purple { background: #F3E8FF; color: #9333EA; }
+.kpi-icon-badge.purple { background: #F3E8FF; color: #7C3AED; }
 .kpi-icon-badge.cyan { background: #ECFEFF; color: #0891B2; }
-.kpi-icon-badge.emerald { background: #ECFDF5; color: #10B981; }
 .kpi-icon-badge.amber { background: #FEF3C7; color: #D97706; }
 .kpi-icon-badge.teal { background: #F0FDFA; color: #0D9488; }
-.kpi-icon-badge.rose { background: #FFE4E6; color: #E11D48; }
+.kpi-icon-badge.rose { background: #FEF2F2; color: #EF4444; }
 .kpi-icon-badge.indigo { background: #EEF2FF; color: #4F46E5; }
 
 .kpi-name {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #6B7280;
+  color: #4B5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kpi-value-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .kpi-value {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #111827;
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .trend-badge {
-  display: flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .trend-badge.positive { background: #ECFDF5; color: #059669; }
-.trend-badge.negative { background: #FEF2F2; color: #DC2626; }
+.trend-badge.negative { background: #FEF2F2; color: #EF4444; }
+.trend-badge.neutral { background: #F3F4F6; color: #4B5563; }
 
 /* ── Section 2: Podium Grid (Top 3 Performers) ── */
 .podium-grid {
@@ -1119,10 +1176,10 @@ onMounted(() => {
 
 .podium-card {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 14px;
   padding: 1.5rem;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
   text-align: center;
   position: relative;
   transition: all 0.2s ease;
@@ -1131,23 +1188,23 @@ onMounted(() => {
 
 .podium-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 24px 0px;
 }
 
 .gold-podium {
   border: 2px solid #F59E0B;
   background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 100%);
   padding-top: 2rem;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
 }
 
 .silver-podium {
-  border: 1px solid #94A3B8;
+  border: 1px solid #CBD5E1;
   background: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
 }
 
 .bronze-podium {
-  border: 1px solid #D97706;
+  border: 1px solid #F97316;
   background: linear-gradient(180deg, #FFF7ED 0%, #FFFFFF 100%);
 }
 
@@ -1294,16 +1351,16 @@ onMounted(() => {
 .award-card-premium {
   background: #ffffff;
   border-radius: 12px;
-  padding: 1.1rem;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  padding: 1.15rem;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .award-card-premium:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 8px 20px 0px;
 }
 
 .award-header-row {
@@ -1353,7 +1410,7 @@ onMounted(() => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #2563EB;
+  background: #059669;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -1387,8 +1444,8 @@ onMounted(() => {
 
 .award-metric-pill {
   padding: 0.2rem 0.5rem;
-  background: #EEF2FF;
-  color: #4F46E5;
+  background: #ECFDF5;
+  color: #059669;
   font-size: 0.72rem;
   font-weight: 700;
   border-radius: 6px;
@@ -1399,16 +1456,19 @@ onMounted(() => {
 .card-analytics {
   background: #ffffff;
   border-radius: 14px;
-  padding: 1.25rem;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  padding: 1.5rem;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .table-controls-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -1421,7 +1481,7 @@ onMounted(() => {
 }
 
 .card-desc {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #6B7280;
   margin: 0;
 }
@@ -1437,7 +1497,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.35rem 0.6rem;
+  padding: 0.4rem 0.75rem;
   background: #ffffff;
   border: 1px solid #D1D5DB;
   border-radius: 8px;
@@ -1453,6 +1513,7 @@ onMounted(() => {
 
 .table-responsive {
   overflow-x: auto;
+  border-radius: 8px;
 }
 
 .leaderboard-table {
@@ -1463,11 +1524,12 @@ onMounted(() => {
 }
 
 .leaderboard-table th {
-  padding: 0.75rem 0.85rem;
+  padding: 0.85rem 1rem;
   background: #F9FAFB;
   color: #4B5563;
   font-weight: 600;
   border-bottom: 1px solid #E5E7EB;
+  font-size: 0.8rem;
 }
 
 .sortable-th {
@@ -1480,11 +1542,11 @@ onMounted(() => {
 .sort-arrow {
   margin-left: 0.2rem;
   font-weight: 700;
-  color: #2563EB;
+  color: #059669;
 }
 
 .leaderboard-table td {
-  padding: 0.85rem;
+  padding: 0.9rem 1rem;
   border-bottom: 1px solid #F3F4F6;
   vertical-align: middle;
 }
@@ -1498,7 +1560,7 @@ onMounted(() => {
 }
 
 .clickable-cell:hover .eng-name {
-  color: #2563EB;
+  color: #059669;
   text-decoration: underline;
 }
 
@@ -1524,12 +1586,12 @@ onMounted(() => {
 .eng-cell {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
 }
 
 .eng-avatar {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1543,7 +1605,7 @@ onMounted(() => {
 .gold-avatar { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
 .silver-avatar { background: linear-gradient(135deg, #94A3B8 0%, #64748B 100%); }
 .bronze-avatar { background: linear-gradient(135deg, #F97316 0%, #C2410C 100%); }
-.default-avatar { background: #3B82F6; }
+.default-avatar { background: #059669; }
 
 .eng-name { font-weight: 700; color: #111827; transition: color 0.15s ease; }
 .eng-meta { font-size: 0.72rem; color: #6B7280; }
@@ -1620,31 +1682,31 @@ onMounted(() => {
 .status-at-risk { background: #FEE2E2; color: #991B1B; }
 
 .btn-detail {
-  padding: 0.3rem 0.75rem;
+  padding: 0.4rem 0.8rem;
   font-size: 0.78rem;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   border: none;
 }
 
 .btn-detail.primary {
-  background: #2563EB;
+  background: #059669;
   color: #ffffff;
 }
 
 .btn-detail.primary:hover {
-  background: #1D4ED8;
+  background: #047857;
 }
 
 /* ── Section 5: AI Insights Card ── */
 .ai-insights-card {
-  background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   border-radius: 16px;
   padding: 1.5rem;
   color: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.4);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 10px 25px 0px;
 }
 
 .ai-card-header {
@@ -1668,7 +1730,7 @@ onMounted(() => {
   height: 32px;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 8px;
-  color: #A5B4FC;
+  color: #34D399;
 }
 
 .ai-card-title {
@@ -1681,7 +1743,7 @@ onMounted(() => {
 .ai-tag-sm {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #818CF8;
+  color: #34D399;
   letter-spacing: 0.05em;
   background: rgba(255, 255, 255, 0.1);
   padding: 0.2rem 0.5rem;
@@ -1699,7 +1761,7 @@ onMounted(() => {
 .ai-headline-box h4 {
   font-size: 0.92rem;
   font-weight: 600;
-  color: #E0E7FF;
+  color: #F1F5F9;
   margin: 0;
 }
 
@@ -1716,7 +1778,7 @@ onMounted(() => {
 .ai-col h5 {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #C7D2FE;
+  color: #94A3B8;
   margin: 0 0 0.6rem 0;
 }
 
@@ -1734,7 +1796,7 @@ onMounted(() => {
   align-items: flex-start;
   gap: 0.5rem;
   font-size: 0.82rem;
-  color: #E0E7FF;
+  color: #F1F5F9;
   line-height: 1.4;
 }
 
@@ -1759,7 +1821,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #2563EB;
+  background: #059669;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -1779,7 +1841,7 @@ onMounted(() => {
   align-items: flex-end;
 }
 
-.md-score-num { font-size: 1.3rem; font-weight: 800; color: #2563EB; }
+.md-score-num { font-size: 1.3rem; font-weight: 800; color: #059669; }
 .md-score-sub { font-size: 0.72rem; font-weight: 700; color: #6B7280; }
 
 .md-stats-row {

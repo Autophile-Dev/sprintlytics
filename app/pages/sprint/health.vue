@@ -734,7 +734,7 @@
 
         <!-- Member Cards -->
         <div class="member-cards-grid">
-          <div v-for="m in activeTeam" :key="m.name" class="member-card">
+          <div v-for="m in activeTeam" :key="m.name" class="member-card" style="cursor: pointer" @click="openMemberProfile(m)">
             <div class="mc-avatar" :style="{ background: memberColor(m.name) }">{{ memberInitials(m.name) }}</div>
             <div class="mc-body">
               <div class="mc-name-row">
@@ -974,6 +974,14 @@ import SparklineChart from '~/components/SparklineChart.vue';
 useHead({ title: 'Sprint Health Analytics | Sprintlytics' });
 
 const route = useRoute();
+const router = useRouter();
+
+const openMemberProfile = (member) => {
+  if (!member) return;
+  const proj = selectedProject.value;
+  const targetId = member.id || (proj ? `${proj}__${member.email || member.name}` : member.email || member.name);
+  router.push(`/team/member/${encodeURIComponent(targetId)}`);
+};
 const selectedProject = ref('');
 const selectedPeriod = ref('daily');
 const pending = ref(false);

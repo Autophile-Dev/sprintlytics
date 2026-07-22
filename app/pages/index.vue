@@ -615,7 +615,7 @@
               <tr v-for="(p, idx) in leaderboardList" :key="'lead-'+p.companyName">
                 <td>
                   <span class="rank-badge" :class="'rank-' + (idx + 1)">
-                    {{ idx === 0 ? '🥇 1' : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : '#' + (idx + 1) }}
+                    #{{ idx + 1 }}
                   </span>
                 </td>
                 <td class="font-semibold cursor-pointer" @click="navigateToProject(p.companyName)">{{ p.companyName }}</td>

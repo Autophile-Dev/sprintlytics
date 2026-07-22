@@ -385,7 +385,7 @@
         </div>
 
         <div class="team-cards-grid">
-          <div v-for="member in members" :key="'tm-'+member.email" class="team-card">
+          <div v-for="member in members" :key="'tm-'+member.email" class="team-card" style="cursor: pointer" @click="openMemberProfile(member)">
             <div class="tc-header">
               <div
                 class="tc-avatar-initials"
@@ -704,8 +704,14 @@
         <div class="modal-body">
           <p>Download comprehensive Team Performance &amp; Engineering KPI Report for <strong>{{ selectedProject }}</strong>.</p>
           <div class="report-options">
-            <button class="report-opt-btn" @click="downloadReport('excel')">📊 Download Excel / CSV</button>
-            <button class="report-opt-btn" @click="downloadReport('pdf')">📄 Print / Export PDF</button>
+            <button class="report-opt-btn" @click="downloadReport('excel')" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Download Excel / CSV
+            </button>
+            <button class="report-opt-btn" @click="downloadReport('pdf')" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Print / Export PDF
+            </button>
           </div>
         </div>
       </div>
@@ -742,6 +748,12 @@ useHead({ title: 'Team Performance KPIs | Sprintlytics' });
 
 const route = useRoute();
 const router = useRouter();
+
+const openMemberProfile = (member) => {
+  if (!member) return;
+  const targetId = member.id || (member.companyName ? `${member.companyName}__${member.email || member.name}` : member.email || member.name);
+  router.push(`/team/member/${encodeURIComponent(targetId)}`);
+};
 
 // State
 const selectedProject = ref(route.query.project || 'ALL');

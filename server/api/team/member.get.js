@@ -25,15 +25,24 @@ export default defineEventHandler(async (event) => {
     let targetCompany = '';
     let targetEmail = '';
     let targetName = '';
+    let targetHandle = '';
 
     if (memberId.includes('__')) {
       const parts = memberId.split('__');
       targetCompany = parts[0].trim();
-      targetEmail = parts[1].trim().toLowerCase();
+      const rightPart = parts[1].trim();
+      if (rightPart.includes('@')) {
+        targetEmail = rightPart.toLowerCase();
+        targetHandle = targetEmail.split('@')[0];
+      } else {
+        targetName = rightPart.toLowerCase();
+      }
     } else if (memberId.includes('@')) {
       targetEmail = memberId.trim().toLowerCase();
+      targetHandle = targetEmail.split('@')[0];
     } else {
       targetName = memberId.trim().toLowerCase();
+      if (targetName.includes('.')) targetHandle = targetName.split('.')[0];
     }
 
     // ─── 2. Find all historical snapshots matching this team member ───────────
@@ -52,14 +61,19 @@ export default defineEventHandler(async (event) => {
 
         const mEmail = (mem.email || '').toLowerCase();
         const mName  = mem.name.toLowerCase();
+        const mHandle = mEmail ? mEmail.split('@')[0] : '';
 
         let isMatch = false;
-        if (targetEmail && mEmail) {
-          isMatch = mEmail === targetEmail;
-        } else if (targetName) {
-          isMatch = mName.includes(targetName) || targetName.includes(mName);
-        } else if (targetCompany && targetEmail) {
-          isMatch = company.toLowerCase() === targetCompany.toLowerCase() && mEmail === targetEmail;
+        if (targetCompany && targetEmail && company.toLowerCase() === targetCompany.toLowerCase() && mEmail === targetEmail) {
+          isMatch = true;
+        } else if (targetEmail && mEmail && mEmail === targetEmail) {
+          isMatch = true;
+        } else if (targetCompany && targetHandle && company.toLowerCase() === targetCompany.toLowerCase() && (mHandle === targetHandle || mName.includes(targetHandle))) {
+          isMatch = true;
+        } else if (targetName && (mName === targetName || mName.includes(targetName) || targetName.includes(mName))) {
+          isMatch = true;
+        } else if (targetHandle && (mHandle === targetHandle || mName.includes(targetHandle))) {
+          isMatch = true;
         }
 
         if (isMatch) {
@@ -119,24 +133,65 @@ export default defineEventHandler(async (event) => {
 
     // ─── 3. Fallback Member Profile if no DB records matched ─────────────────
     if (!latestMemberData) {
-      const cleanName = memberId.includes('__') ? memberId.split('__')[1].replace(/@.*/, '').replace(/\./g, ' ') : memberId;
-      const titleCaseName = cleanName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'M. Tahir Irshad';
+      const canonicalMembers = [
+        { name: 'M. Tahir Irshad', email: 'tahir@jomfood.com', role: 'Tech Lead & Eng Manager', companyName: 'Jom Smart Central', utilPct: 88, spD: 32, spA: 34, assigned: 14, completed: 14, blocked: 0, status: 'Balanced' },
+        { name: 'Zainab Fatima', email: 'zainab@jomfood.com', role: 'Senior UI/UX Lead', companyName: 'Jom Smart Central', utilPct: 80, spD: 26, spA: 26, assigned: 10, completed: 10, blocked: 0, status: 'Balanced' },
+        { name: 'Rashid Mahmood', email: 'rashid@jomfood.com', role: 'Senior Backend Engineer', companyName: 'Jom Smart Central', utilPct: 105, spD: 38, spA: 42, assigned: 16, completed: 14, blocked: 1, status: 'Overloaded' },
+        { name: 'Sarah Khan', email: 'sarah@jomfood.com', role: 'QA Automation Lead', companyName: 'Jom Smart Central', utilPct: 75, spD: 22, spA: 24, assigned: 12, completed: 11, blocked: 0, status: 'Balanced' },
+        { name: 'Faisal SysLab', email: 'faisal@syslab.com', role: 'Principal Software Architect', companyName: 'Barena ERP', utilPct: 110, spD: 46, spA: 46, assigned: 18, completed: 18, blocked: 0, status: 'Overloaded' },
+        { name: 'Hamza Sheikh', email: 'hamza@barena.com', role: 'Senior Fullstack Engineer', companyName: 'Barena ERP', utilPct: 95, spD: 38, spA: 40, assigned: 15, completed: 14, blocked: 0, status: 'Overloaded' },
+        { name: 'Kamran Akmal', email: 'kamran@barena.com', role: 'Database Administrator', companyName: 'Barena ERP', utilPct: 85, spD: 28, spA: 30, assigned: 11, completed: 10, blocked: 0, status: 'Balanced' },
+        { name: 'Ayesha Omer', email: 'ayesha@barena.com', role: 'QA Automation Specialist', companyName: 'Barena ERP', utilPct: 70, spD: 20, spA: 24, assigned: 9, completed: 8, blocked: 1, status: 'Balanced' },
+        { name: 'Ahmad Raza', email: 'ahmad@flexa.com', role: 'Senior Backend Engineer', companyName: 'FLEXA ERP', utilPct: 95, spD: 30, spA: 36, assigned: 13, completed: 11, blocked: 1, status: 'Overloaded' },
+        { name: 'Usman Ali', email: 'usman@flexa.com', role: 'DevOps & Cloud Engineer', companyName: 'FLEXA ERP', utilPct: 85, spD: 24, spA: 26, assigned: 10, completed: 9, blocked: 0, status: 'Balanced' },
+        { name: 'Noman Ejaz', email: 'noman@flexa.com', role: 'Frontend Developer', companyName: 'FLEXA ERP', utilPct: 65, spD: 14, spA: 20, assigned: 8, completed: 6, blocked: 1, status: 'Underutilized' }
+      ];
 
-      latestMemberData = {
-        name: titleCaseName,
-        email: `${titleCaseName.toLowerCase().replace(/\s+/g, '.')}@sprintlytics.com`,
-        companyName: targetCompany || 'Jom Smart Central',
-        sprintName: 'Active Sprint 24',
-        assigned: 14,
-        completed: 14,
-        blocked: 0,
-        storyPointsDelivered: 32,
-        storyPointsAssigned: 34,
-        loggedHours: 36,
-        utilizationPct: 88,
-        completionRate: 95,
-        status: 'Balanced'
-      };
+      const searchKey = (targetEmail || targetHandle || targetName || memberId).toLowerCase();
+      const matchedCanonical = canonicalMembers.find(m => 
+        (targetCompany && m.companyName.toLowerCase() === targetCompany.toLowerCase() && (m.email.toLowerCase() === targetEmail || m.name.toLowerCase().includes(searchKey))) ||
+        m.email.toLowerCase() === targetEmail ||
+        m.name.toLowerCase().includes(searchKey) ||
+        searchKey.includes(m.name.toLowerCase()) ||
+        m.email.toLowerCase().includes(searchKey)
+      );
+
+      if (matchedCanonical) {
+        latestMemberData = {
+          name: matchedCanonical.name,
+          email: matchedCanonical.email,
+          companyName: matchedCanonical.companyName,
+          sprintName: 'Active Sprint 24',
+          assigned: matchedCanonical.assigned,
+          completed: matchedCanonical.completed,
+          blocked: matchedCanonical.blocked,
+          storyPointsDelivered: matchedCanonical.spD,
+          storyPointsAssigned: matchedCanonical.spA,
+          loggedHours: Math.round((matchedCanonical.utilPct / 100) * 40),
+          utilizationPct: matchedCanonical.utilPct,
+          completionRate: Math.round((matchedCanonical.completed / matchedCanonical.assigned) * 100),
+          status: matchedCanonical.status
+        };
+      } else {
+        const cleanName = memberId.includes('__') ? memberId.split('__')[1].replace(/@.*/, '').replace(/\./g, ' ') : memberId;
+        const titleCaseName = cleanName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'M. Tahir Irshad';
+
+        latestMemberData = {
+          name: titleCaseName,
+          email: targetEmail || `${titleCaseName.toLowerCase().replace(/\s+/g, '.')}@sprintlytics.com`,
+          companyName: targetCompany || 'Jom Smart Central',
+          sprintName: 'Active Sprint 24',
+          assigned: 14,
+          completed: 14,
+          blocked: 0,
+          storyPointsDelivered: 32,
+          storyPointsAssigned: 34,
+          loggedHours: 36,
+          utilizationPct: 88,
+          completionRate: 95,
+          status: 'Balanced'
+        };
+      }
       companyName = latestMemberData.companyName;
     }
 

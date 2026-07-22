@@ -381,12 +381,12 @@
           </div>
 
           <div class="ai-headline-box">
-            <h4>💡 {{ member.aiFeedback?.headline }}</h4>
+            <h4>{{ member.aiFeedback?.headline }}</h4>
           </div>
 
           <div class="ai-insights-grid">
             <div class="ai-col">
-              <h5>🏆 Core Engineering Strengths</h5>
+              <h5>Core Engineering Strengths</h5>
               <ul>
                 <li v-for="(s, idx) in (member.aiFeedback?.strengths || [])" :key="idx">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -396,7 +396,7 @@
             </div>
 
             <div class="ai-col">
-              <h5>🎯 Recommended Focus &amp; Growth Areas</h5>
+              <h5>Recommended Focus &amp; Growth Areas</h5>
               <ul>
                 <li v-for="(i, idx) in (member.aiFeedback?.improvements || [])" :key="idx">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -449,16 +449,30 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const memberId = computed(() => route.params.id ? decodeURIComponent(route.params.id) : 'M. Tahir Irshad');
+
+const safeDecode = (val) => {
+  if (!val) return '';
+  const raw = Array.isArray(val) ? val[0] : val;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+};
+
+const memberId = computed(() => {
+  const raw = route.params.id;
+  return raw ? safeDecode(raw) : 'M. Tahir Irshad';
+});
 
 const selectedPeriod = ref('daily');
 const selectedRange  = ref(10);
 
-const pending = ref(false);
+const pending = ref(true);
 const member  = ref(null);
 
 const showReportModal = ref(false);
@@ -581,6 +595,14 @@ const fetchMemberData = async () => {
     pending.value = false;
   }
 };
+
+onMounted(() => {
+  fetchMemberData();
+});
+
+watch(() => route.params.id, () => {
+  fetchMemberData();
+});
 
 const setPeriod = (p) => {
   selectedPeriod.value = p;
@@ -905,11 +927,29 @@ onMounted(() => {
 .score-num { font-size: 1.7rem; font-weight: 800; line-height: 1; }
 .score-lbl { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; margin-top: 2px; }
 
-/* ── 8 Executive KPI Grid ── */
+/* ── 8 Executive KPI Grid (4 per row) ── */
 .exec-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .exec-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .exec-kpi-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .kpi-card-premium {
@@ -920,9 +960,9 @@ onMounted(() => {
   box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
-.kpi-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
-.kpi-title-with-icon { display: flex; align-items: center; gap: 0.5rem; }
-.kpi-icon-badge { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; }
+.kpi-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; gap: 0.5rem; white-space: nowrap; min-width: 0; }
+.kpi-title-with-icon { display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.kpi-icon-badge { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; }
 .kpi-icon-badge.cyan { background: #ECFEFF; color: #0891B2; }
 .kpi-icon-badge.emerald { background: #ECFDF5; color: #10B981; }
 .kpi-icon-badge.indigo { background: #EEF2FF; color: #4F46E5; }
@@ -932,11 +972,11 @@ onMounted(() => {
 .kpi-icon-badge.teal { background: #F0FDFA; color: #0D9488; }
 .kpi-icon-badge.blue { background: #EFF6FF; color: #2563EB; }
 
-.kpi-name { font-size: 0.8rem; font-weight: 600; color: #6B7280; }
-.kpi-value-row { display: flex; align-items: baseline; justify-content: space-between; }
-.kpi-value { font-size: 1.35rem; font-weight: 700; color: #111827; }
+.kpi-name { font-size: 0.8rem; font-weight: 600; color: #6B7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-value-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; white-space: nowrap; min-width: 0; }
+.kpi-value { font-size: 1.35rem; font-weight: 700; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
-.trend-badge { display: flex; align-items: center; gap: 0.2rem; font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.4rem; border-radius: 4px; }
+.trend-badge { display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.4rem; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
 .trend-badge.positive { background: #ECFDF5; color: #059669; }
 .trend-badge.negative { background: #FEF2F2; color: #DC2626; }
 
