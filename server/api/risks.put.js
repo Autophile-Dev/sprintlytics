@@ -1,5 +1,5 @@
-import connectDB from './utils/db';
-import Risk from './models/Risk';
+import connectDB from '../utils/db';
+import Risk from '../models/Risk';
 
 export default defineEventHandler(async (event) => {
   try {

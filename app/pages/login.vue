@@ -245,8 +245,10 @@
           <!-- State 5: RESET PASSWORD -->
           <div v-else-if="authState === 'reset-password'" class="form-content-wrapper">
             <div class="form-header">
-              <h2 class="form-title">Reset Password</h2>
-              <p class="form-subtitle">Enter the 6-digit reset code sent to your email and your new password.</p>
+              <h2 class="form-title">Verify OTP & Reset Password</h2>
+              <p class="form-subtitle">
+                Enter the 6-digit code sent to <strong style="color: #059669; word-break: break-all;">{{ targetEmail || forgotEmail }}</strong> and set your new password.
+              </p>
             </div>
 
             <form @submit.prevent="handleResetPassword" class="login-form" novalidate>
@@ -332,8 +334,14 @@
               </button>
             </form>
 
-            <div class="form-footer">
-              <p><a href="#" @click.prevent="switchState('login')" class="footer-link flex-link">
+            <div class="form-footer" style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+              <p style="margin: 0; font-size: 0.85rem; color: #6B7280;">
+                Didn't receive the code?
+                <a href="#" @click.prevent="handleForgotPassword" class="footer-link" style="font-weight: 600; color: #059669;">
+                  Resend OTP
+                </a>
+              </p>
+              <p style="margin: 0;"><a href="#" @click.prevent="switchState('login')" class="footer-link flex-link">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M19 12H5M5 12l7 7M5 12l7-7" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>

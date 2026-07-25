@@ -37,12 +37,12 @@
           <CustomSelect
             v-model="selectedProject"
             :options="projectOptions"
-            @change="fetchReportData"
+            @change="onProjectChange"
           />
         </div>
 
-        <!-- Historical Report Selector -->
-        <div class="filter-group" v-if="historyOptions.length > 1">
+        <!-- Historical Sprint Report Selector (Always Enabled) -->
+        <div class="filter-group">
           <CustomSelect
             v-model="selectedHistoryId"
             :options="historyOptions"
@@ -425,12 +425,27 @@ const projectOptions = computed(() => {
 });
 
 const historyOptions = computed(() => {
-  if (!historyList.value.length) return [{ label: 'Latest Sprint Run', value: '' }];
-  return historyList.value.map(h => ({
-    label: `${h.companyName} (${formatDate(h.generatedAt)}) — ${h.healthScore}% Health`,
+  let list = historyList.value || [];
+  if (selectedProject.value && selectedProject.value !== 'ALL') {
+    const sel = selectedProject.value.toLowerCase();
+    list = list.filter(h => h.companyName && h.companyName.toLowerCase() === sel);
+  }
+  if (!list.length) {
+    const fallbackLabel = selectedProject.value !== 'ALL' 
+      ? `No Sprints for ${selectedProject.value}` 
+      : 'No Sprint Reports Available';
+    return [{ label: fallbackLabel, value: '' }];
+  }
+  return list.map(h => ({
+    label: `${h.companyName} (${formatDate(h.generatedAt)}) — ${h.kpis?.healthScore ?? h.healthScore ?? 80}% Health`,
     value: h._id
   }));
 });
+
+const onProjectChange = () => {
+  selectedHistoryId.value = '';
+  fetchReportData();
+};
 
 const fetchReportData = async () => {
   pending.value = true;
@@ -448,7 +463,7 @@ const fetchReportData = async () => {
       historyList.value = res.history || [];
       companiesList.value = res.companies || [];
 
-      if (res.report && !selectedHistoryId.value) {
+      if (res.report && (!selectedHistoryId.value || !historyList.value.some(h => h._id === selectedHistoryId.value))) {
         selectedHistoryId.value = res.report._id;
       }
     }

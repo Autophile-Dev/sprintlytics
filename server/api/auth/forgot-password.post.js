@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     return genericResponse;
   }
 
-  // Ensure user is verified (unverified accounts must verify their email via registration flow first)
+  // Ensure user is verified
   if (!user.isVerified) {
     return genericResponse;
   }
@@ -61,21 +61,92 @@ export default defineEventHandler(async (event) => {
     expiresAt,
   });
 
-  // 6. Send the reset OTP email
+  // 6. Send high-grade, styled HTML reset OTP email
+  const htmlTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Your Password - Sprintlytics</title>
+</head>
+<body style="margin:0; padding:0; background-color:#F3F4F6; font-family: 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#F3F4F6; padding: 40px 15px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 540px; background-color:#ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #E5E7EB;">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td align="center" style="background: linear-gradient(135deg, #065F46 0%, #059669 100%); padding: 32px 24px; text-align: center;">
+              <div style="display: inline-block; background: rgba(255,255,255,0.15); padding: 10px 22px; border-radius: 12px;">
+                <span style="font-size: 24px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; font-family: sans-serif;">
+                  ⚡ Sprintlytics
+                </span>
+              </div>
+              <p style="margin: 8px 0 0 0; color: #A7F3D0; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+                Agile Performance & Analytics Platform
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body Content -->
+          <tr>
+            <td style="padding: 36px 32px;">
+              <h2 style="margin: 0 0 10px 0; color: #111827; font-size: 22px; font-weight: 700; text-align: center;">
+                Password Reset Verification
+              </h2>
+              <p style="margin: 0 0 24px 0; color: #4B5563; font-size: 15px; line-height: 1.6; text-align: center;">
+                We received a request to reset the password for your account (<strong>${email}</strong>). Use the 6-digit verification code below to authorize your password update:
+              </p>
+
+              <!-- OTP Code Display Card -->
+              <div style="background-color: #ECFDF5; border: 2px dashed #059669; border-radius: 14px; padding: 22px; text-align: center; margin: 24px 0;">
+                <span style="font-family: 'Courier New', Courier, monospace; font-size: 38px; font-weight: 800; color: #047857; letter-spacing: 10px; display: block; margin-left: 10px;">
+                  ${rawOtp}
+                </span>
+                <div style="margin-top: 12px;">
+                  <span style="display: inline-block; background: #D1FAE5; color: #065F46; font-size: 12px; font-weight: 600; padding: 4px 14px; border-radius: 20px;">
+                    ⏱️ Expires in 5 Minutes
+                  </span>
+                </div>
+              </div>
+
+              <!-- Security Warning -->
+              <div style="background-color: #FFFBEB; border-left: 4px solid #F59E0B; border-radius: 6px; padding: 14px 16px; margin-bottom: 24px;">
+                <p style="margin: 0; color: #92400E; font-size: 13px; line-height: 1.5;">
+                  <strong>Security Reminder:</strong> If you did not request this password reset, please ignore this email or contact support. Never share this 6-digit code with anyone.
+                </p>
+              </div>
+
+              <p style="margin: 0; color: #6B7280; font-size: 13px; text-align: center;">
+                Need help? Contact <a href="mailto:support@sprintlytics.com" style="color: #059669; text-decoration: none; font-weight: 600;">support@sprintlytics.com</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #F9FAFB; padding: 20px 24px; text-align: center; border-top: 1px solid #F3F4F6;">
+              <p style="margin: 0; color: #9CA3AF; font-size: 12px;">
+                &copy; ${new Date().getFullYear()} Sprintlytics Analytics Inc. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
   await sendMail({
     to: email,
-    subject: "Reset Your Password - Sprintlytics",
-    text: `Your password reset code is ${rawOtp}. This code expires in 5 minutes.`,
-    html: `
-      <div style="font-family: sans-serif; padding: 25px; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e4e4e7; border-radius: 8px;">
-        <h2 style="color: #0f172a; margin-bottom: 16px;">Password Reset Request</h2>
-        <p style="color: #475569; font-size: 16px; line-height: 24px;">We received a request to reset your password. Use the following code to proceed:</p>
-        <div style="background-color: #f1f5f9; padding: 20px; font-size: 32px; font-weight: bold; letter-spacing: 4px; text-align: center; border-radius: 6px; margin: 24px 0; color: #dc2626;">
-          ${rawOtp}
-        </div>
-        <p style="color: #64748b; font-size: 14px; line-height: 20px;">This code will expire in 5 minutes. If you did not make this request, you can safely ignore this email.</p>
-      </div>
-    `,
+    subject: "Reset Your Password - Sprintlytics Code",
+    text: `Your Sprintlytics password reset code is ${rawOtp}. This code expires in 5 minutes.`,
+    html: htmlTemplate,
   });
 
   return genericResponse;
