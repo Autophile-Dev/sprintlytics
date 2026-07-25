@@ -32,13 +32,63 @@
     </div>
 
     <div class="topbar__right">
-      <!-- Search Bar -->
-      <div class="topbar__search">
+      <!-- Search Bar & Command Palette Dropdown -->
+      <div class="topbar__search" ref="searchRef">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" placeholder="Search analytics, sprints, team..." class="search-input" />
+        <input 
+          ref="searchInputRef"
+          type="text" 
+          v-model="searchQuery"
+          @focus="isSearchOpen = true"
+          @input="onSearchInput"
+          @keydown="handleSearchKeydown"
+          placeholder="Search analytics, sprints, team... (Ctrl+K)" 
+          class="search-input" 
+        />
+        <span class="search-kbd-badge" @click="focusSearch">Ctrl K</span>
+
+        <!-- Command Palette Search Results Dropdown -->
+        <Transition name="slide-up">
+          <div v-show="isSearchOpen && (searchResults.total > 0 || isSearching || searchQuery.length >= 2)" class="search-dropdown-card custom-scroll">
+            <div v-if="isSearching" class="search-loading">
+              <svg class="spinning" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+              <span>Searching workspace entities...</span>
+            </div>
+
+            <div v-else-if="flattenedResults.length > 0" class="search-results-list">
+              <div 
+                v-for="(item, idx) in flattenedResults" 
+                :key="item.id || idx"
+                class="search-result-row"
+                :class="{ 'search-result-row--selected': selectedSearchIdx === idx }"
+                @click="selectSearchResult(item)"
+                @mouseenter="selectedSearchIdx = idx"
+              >
+                <div class="result-icon-box" :class="'cat--' + item.category">
+                  <!-- Clean SVG vector icons for each category -->
+                  <svg v-if="item.category === 'projects'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  <svg v-else-if="item.category === 'team'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <svg v-else-if="item.category === 'risks'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <svg v-else-if="item.category === 'reports'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </div>
+                <div class="result-text-box">
+                  <div class="result-row-title">{{ item.title }}</div>
+                  <div class="result-row-sub">{{ item.subtitle }}</div>
+                </div>
+                <span class="result-cat-chip">{{ item.category }}</span>
+              </div>
+            </div>
+
+            <div v-else class="search-empty-state">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span>No workspace entities found for "{{ searchQuery }}"</span>
+            </div>
+          </div>
+        </Transition>
       </div>
 
       <!-- Quick Actions -->
@@ -250,6 +300,16 @@ const route = useRoute();
 const isOpen = ref(false);
 const dropdownRef = ref(null);
 
+// Global Search & Command Palette State
+const searchRef = ref(null);
+const searchInputRef = ref(null);
+const searchQuery = ref('');
+const isSearchOpen = ref(false);
+const isSearching = ref(false);
+const selectedSearchIdx = ref(0);
+const searchResults = ref({ total: 0, results: { projects: [], team: [], risks: [], reports: [], shortcuts: [] } });
+let searchDebounceTimer = null;
+
 // Notifications State
 const notifications = ref([]);
 const unreadCount = ref(0);
@@ -278,6 +338,78 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
 const triggerLogout = () => {
   isOpen.value = false;
   emit('logout');
+};
+
+// Flattened search results array for keyboard navigation
+const flattenedResults = computed(() => {
+  const r = searchResults.value.results || {};
+  return [
+    ...(r.projects || []),
+    ...(r.team || []),
+    ...(r.risks || []),
+    ...(r.reports || []),
+    ...(r.shortcuts || []),
+  ];
+});
+
+// Search API Handler with 200ms Debounce
+const executeSearch = async () => {
+  isSearching.value = true;
+  try {
+    const res = await $fetch('/api/search', {
+      params: { q: searchQuery.value }
+    });
+    if (res && res.success) {
+      searchResults.value = res;
+      selectedSearchIdx.value = 0;
+    }
+  } catch (err) {
+    console.warn('Search API error:', err);
+  } finally {
+    isSearching.value = false;
+  }
+};
+
+const onSearchInput = () => {
+  isSearchOpen.value = true;
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(executeSearch, 200);
+};
+
+const focusSearch = () => {
+  if (searchInputRef.value) {
+    searchInputRef.value.focus();
+    isSearchOpen.value = true;
+    executeSearch();
+  }
+};
+
+const handleSearchKeydown = (e) => {
+  if (!isSearchOpen.value) return;
+  const list = flattenedResults.value;
+  if (!list.length) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    selectedSearchIdx.value = (selectedSearchIdx.value + 1) % list.length;
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    selectedSearchIdx.value = (selectedSearchIdx.value - 1 + list.length) % list.length;
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    const item = list[selectedSearchIdx.value];
+    if (item) selectSearchResult(item);
+  } else if (e.key === 'Escape') {
+    isSearchOpen.value = false;
+  }
+};
+
+const selectSearchResult = (item) => {
+  isSearchOpen.value = false;
+  searchQuery.value = '';
+  if (item && item.actionUrl) {
+    router.push(item.actionUrl);
+  }
 };
 
 // Web Audio API Dual-Tone Chime ("Ding Dong Bell")
@@ -312,7 +444,6 @@ const playDingDongChime = () => {
     osc2.start(ctx.currentTime + 0.15);
     osc2.stop(ctx.currentTime + 0.75);
 
-    // Trigger visual bell wobble animation
     triggerBellAnimation();
   } catch (e) {
     console.warn('[AudioChime] Web Audio API failed:', e.message);
@@ -349,7 +480,6 @@ const fetchNotifications = async () => {
       notifications.value = res.notifications || [];
       unreadCount.value = res.unreadCount || 0;
 
-      // Play chime and toast if new unread alert arrived dynamically
       if (res.unreadCount > prevUnread && prevUnread >= 0 && notifications.value.length) {
         const latest = notifications.value[0];
         triggerFloatingToast(latest.title, latest.message, latest.type, latest.actionUrl);
@@ -441,6 +571,14 @@ const formatTimeAgo = (d) => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
+// Global Ctrl+K / Cmd+K Keyboard Shortcut Listener
+const handleGlobalKeydown = (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    focusSearch();
+  }
+};
+
 const handleClickOutside = (event) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
     isOpen.value = false;
@@ -448,17 +586,21 @@ const handleClickOutside = (event) => {
   if (notifRef.value && !notifRef.value.contains(event.target)) {
     isNotificationsOpen.value = false;
   }
+  if (searchRef.value && !searchRef.value.contains(event.target)) {
+    isSearchOpen.value = false;
+  }
 };
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
+  document.addEventListener('keydown', handleGlobalKeydown);
   fetchNotifications();
-  // Live polling every 20 seconds
   pollingTimer = setInterval(fetchNotifications, 20000);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
+  document.removeEventListener('keydown', handleGlobalKeydown);
   if (pollingTimer) clearInterval(pollingTimer);
 });
 </script>
@@ -535,9 +677,9 @@ onBeforeUnmount(() => {
 }
 
 .search-input {
-  width: 240px;
+  width: 260px;
   height: 36px;
-  padding: 0 0.75rem 0 2.25rem;
+  padding: 0 4rem 0 2.25rem;
   border-radius: 8px;
   border: 1px solid #E5E7EB;
   background-color: #F9FAFB;
@@ -551,7 +693,125 @@ onBeforeUnmount(() => {
   background-color: #ffffff;
   border-color: #059669;
   box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
-  width: 280px;
+  width: 320px;
+}
+
+.search-kbd-badge {
+  position: absolute;
+  right: 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #9CA3AF;
+  background: #E5E7EB;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Command Palette Search Dropdown Card */
+.search-dropdown-card {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 420px;
+  max-width: 90vw;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+  border: 1px solid #E5E7EB;
+  max-height: 380px;
+  overflow-y: auto;
+  z-index: 150;
+  padding: 0.4rem;
+}
+
+.search-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem;
+  font-size: 0.82rem;
+  color: #6B7280;
+}
+
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.search-result-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.search-result-row:hover, .search-result-row--selected {
+  background-color: #ECFDF5;
+}
+
+.result-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cat--projects { background: #E0E7FF; color: #4338CA; }
+.cat--team { background: #D1FAE5; color: #047857; }
+.cat--risks { background: #FEE2E2; color: #DC2626; }
+.cat--reports { background: #FEF3C7; color: #D97706; }
+.cat--shortcuts { background: #F3F4F6; color: #4B5563; }
+
+.result-text-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-row-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-row-sub {
+  font-size: 0.74rem;
+  color: #6B7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-cat-chip {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #9CA3AF;
+  background: #F3F4F6;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.search-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  font-size: 0.82rem;
+  color: #6B7280;
 }
 
 .topbar__actions {
@@ -982,6 +1242,15 @@ onBeforeUnmount(() => {
 
 .toast-dismiss-btn:hover {
   color: #ffffff;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Animations & Transitions */
