@@ -1,16 +1,18 @@
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import User from "../../models/User";
+import RememberToken from "../../models/RememberToken";
 import { checkRateLimit } from "../../utils/rateLimiter";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format").trim().toLowerCase(),
   password: z.string(),
+  rememberMe: z.boolean().optional().default(false),
 });
 
-// Dummy hash used to match the execution time of bcrypt.compare when the user does not exist.
-// This prevents timing-based user enumeration.
+// Dummy hash used to match execution time of bcrypt.compare when user does not exist.
 const DUMMY_HASH = "$2a$12$N9qo8uLOqpGCQHiaLk.IG.3E23337Bf1VpK4b8pI2u/6j6p1e2u/6";
 
 export default defineEventHandler(async (event) => {
@@ -19,9 +21,7 @@ export default defineEventHandler(async (event) => {
     try {
       await checkRateLimit(event, "login", 5, 60);
     } catch (rateLimitError) {
-      // If it's already a H3 error (429 Too Many Requests), re-throw it
       if (rateLimitError.statusCode === 429) throw rateLimitError;
-      // Otherwise it's a DB connectivity issue with the rate limiter — skip silently
       console.warn("[Login] Rate limiter DB unavailable, skipping:", rateLimitError.message);
     }
 
@@ -36,12 +36,12 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const { email, password } = parseResult.data;
+    const { email, password, rememberMe } = parseResult.data;
 
     // 3. Retrieve user
     const user = await User.findOne({ email });
 
-    // Timing attack mitigation: if user does not exist, run a comparison anyway
+    // Timing attack mitigation
     if (!user) {
       await bcrypt.compare(password, DUMMY_HASH);
       throw createError({
@@ -87,21 +87,53 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const expiresIn = process.env.JWT_EXPIRES_IN || config.jwtExpiresIn || "1h";
+    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 3600; // 30 days vs 1 hour
+    const expiresIn = rememberMe ? "30d" : (process.env.JWT_EXPIRES_IN || config.jwtExpiresIn || "1h");
+
     const token = jwt.sign(
       { userId: user._id, roles: user.roles },
       jwtSecret,
       { expiresIn }
     );
 
-    // 8. Deliver JWT inside a secure HTTP-Only cookie
+    // 8. Deliver JWT inside secure HTTP-Only cookie
     setCookie(event, "auth_token", token, {
       httpOnly: true,
       secure: process.env.SECURE_COOKIES === "true" || config.secureCookies,
       sameSite: "strict",
       path: "/",
-      maxAge: 3600,
+      maxAge,
     });
+
+    // 9. If Remember Me is enabled, persist long-lived session token in DB
+    if (rememberMe) {
+      try {
+        const rawRememberToken = crypto.randomBytes(32).toString("hex");
+        const tokenHash = crypto.createHash("sha256").update(rawRememberToken).digest("hex");
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+        await RememberToken.create({
+          userId: user._id,
+          email: user.email,
+          tokenHash,
+          userAgent: getHeader(event, "user-agent") || "Unknown Device",
+          ipAddress: getHeader(event, "x-forwarded-for") || event.node.req.socket.remoteAddress || "127.0.0.1",
+          expiresAt,
+          lastUsedAt: new Date(),
+        });
+
+        // Set persistent HTTP-Only remember_token cookie
+        setCookie(event, "remember_token", rawRememberToken, {
+          httpOnly: true,
+          secure: process.env.SECURE_COOKIES === "true" || config.secureCookies,
+          sameSite: "strict",
+          path: "/",
+          maxAge: 30 * 24 * 60 * 60,
+        });
+      } catch (tokErr) {
+        console.warn("[Login] Failed to persist RememberToken in DB:", tokErr.message);
+      }
+    }
 
     return {
       success: true,
@@ -112,10 +144,7 @@ export default defineEventHandler(async (event) => {
     };
 
   } catch (error) {
-    // Re-throw intentional H3 errors as-is
     if (error.statusCode) throw error;
-
-    // Catch all unexpected errors (DB timeouts, network issues) with a friendly message
     console.error("[Login] Unexpected error:", error.message);
     throw createError({
       statusCode: 503,

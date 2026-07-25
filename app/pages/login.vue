@@ -508,11 +508,17 @@ const handleLogin = async () => {
       },
       body: {
         email: loginData.email,
-        password: loginData.password
+        password: loginData.password,
+        rememberMe: loginData.rememberMe
       }
     });
 
     if (response && response.success) {
+      if (loginData.rememberMe) {
+        localStorage.setItem('remembered_email', loginData.email);
+      } else {
+        localStorage.removeItem('remembered_email');
+      }
       router.push('/');
     }
   } catch (error) {
@@ -646,6 +652,16 @@ const handleResetPassword = async () => {
 const handleGoogleSignIn = () => {
   showAlert('Google authentication integration is simulated for development.', 'info', 'Development Mode');
 };
+
+onMounted(() => {
+  if (import.meta.client) {
+    const savedEmail = localStorage.getItem('remembered_email');
+    if (savedEmail) {
+      loginData.email = savedEmail;
+      loginData.rememberMe = true;
+    }
+  }
+});
 </script>
 
 <style scoped>

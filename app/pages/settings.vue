@@ -264,6 +264,23 @@
             </select>
           </div>
 
+          <!-- Active Sessions & Remembered Devices -->
+          <div class="password-change-box margin-top-lg">
+            <h3 class="sub-title">Active Remembered Devices & Sessions</h3>
+            <p class="card-desc" style="margin-top: -0.5rem;">Devices with long-lived "Remember Me" access to your account.</p>
+
+            <div v-if="sessionsList.length" class="toggle-list">
+              <div v-for="sess in sessionsList" :key="sess.id" class="toggle-item">
+                <div class="toggle-text">
+                  <span class="toggle-title">{{ formatDevice(sess.userAgent) }}</span>
+                  <span class="toggle-desc">IP: {{ sess.ipAddress }} • Last active {{ formatDate(sess.lastUsedAt) }}</span>
+                </div>
+                <button class="action-btn secondary-btn" @click="revokeSession(sess.id)">Revoke Access</button>
+              </div>
+            </div>
+            <p v-else class="field-hint">No persistent remembered sessions found on other devices.</p>
+          </div>
+
           <!-- Password Change Form -->
           <div class="password-change-box margin-top-lg">
             <h3 class="sub-title">Change Password</h3>
@@ -355,6 +372,45 @@ const getInitials = (name) => {
   return name.substring(0, 2).toUpperCase();
 };
 
+const sessionsList = ref([]);
+
+const fetchSessions = async () => {
+  try {
+    const res = await $fetch('/api/auth/sessions');
+    if (res && res.success) {
+      sessionsList.value = res.sessions || [];
+    }
+  } catch (err) {
+    console.warn('Error fetching active sessions:', err);
+  }
+};
+
+const revokeSession = async (id) => {
+  try {
+    const csrfToken = useCookie('csrf_token').value;
+    await $fetch('/api/auth/sessions', {
+      method: 'DELETE',
+      headers: { 'x-csrf-token': csrfToken || '' },
+      body: { id }
+    });
+    sessionsList.value = sessionsList.value.filter(s => s.id !== id);
+    showToast('Session access revoked successfully', 'success');
+  } catch (err) {
+    showToast('Failed to revoke session access', 'error');
+  }
+};
+
+const formatDevice = (ua) => {
+  if (!ua) return 'Web Browser Session';
+  if (ua.includes('Chrome')) return 'Chrome Browser';
+  if (ua.includes('Firefox')) return 'Firefox Browser';
+  if (ua.includes('Safari')) return 'Safari Browser';
+  if (ua.includes('Edge')) return 'Microsoft Edge';
+  return 'Desktop / Mobile Device';
+};
+
+const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
+
 const fetchSettings = async () => {
   pending.value = true;
   try {
@@ -366,6 +422,7 @@ const fetchSettings = async () => {
       Object.assign(settings.integrations, res.data.integrations || {});
       Object.assign(settings.security, res.data.security || {});
     }
+    await fetchSessions();
   } catch (err) {
     console.error('Error loading settings:', err);
     showToast('Loaded session settings defaults', 'info');
