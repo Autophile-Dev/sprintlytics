@@ -43,39 +43,46 @@
 
       <!-- Quick Actions -->
       <div class="topbar__actions">
-        <!-- Notification Bell & Drawer Popover -->
+        <!-- Notification Bell & Glassmorphic Popover -->
         <div class="notif-wrapper" ref="notifRef">
           <button 
             class="action-btn" 
-            :class="{ 'ding-dong-ring': isRinging }"
+            :class="{ 'ding-dong-ring': isRinging, 'has-unread': unreadCount > 0 }"
             @click="toggleNotifications" 
             aria-label="Notifications" 
-            title="Notifications & Alerts"
+            title="Notifications & Live Workspace Alerts"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span v-if="unreadCount > 0" class="action-badge-count">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+            <span v-if="unreadCount > 0" class="action-badge-container">
+              <span class="ping-aura"></span>
+              <span class="action-badge-count">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+            </span>
           </button>
 
-          <!-- Notification Drawer Popover -->
-          <Transition name="slide-up">
-            <div v-show="isNotificationsOpen" class="notif-popover">
+          <!-- Glassmorphic Notification Popover Drawer -->
+          <Transition name="glass-pop">
+            <div v-show="isNotificationsOpen" class="notif-popover glass-card">
               <div class="notif-header">
                 <div class="notif-title-group">
                   <h4 class="notif-heading">Workspace Notifications</h4>
-                  <span v-if="unreadCount > 0" class="unread-pill">{{ unreadCount }} new</span>
+                  <span v-if="unreadCount > 0" class="unread-pill">{{ unreadCount }} unread</span>
                 </div>
                 <div class="notif-header-actions">
-                  <button class="chime-test-btn" @click.stop="playDingDongChime" title="Play Bell Chime Sound">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <button class="chime-test-btn" @click.stop="triggerSimulatedAlert" title="Simulate Dynamic Alert">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Simulate</span>
+                  </button>
+                  <button class="chime-test-btn" @click.stop="playDingDongChime" title="Play Chime Sound">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                       <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                       <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                     </svg>
-                    <span>Test Bell</span>
+                    <span>Chime</span>
                   </button>
-                  <button v-if="unreadCount > 0" class="mark-all-btn" @click.stop="markAllAsRead">Mark all read</button>
+                  <button v-if="unreadCount > 0" class="mark-all-btn" @click.stop="markAllAsRead">Clear All</button>
                 </div>
               </div>
 
@@ -84,10 +91,11 @@
                 <button :class="{ active: notifTab === 'all' }" @click="notifTab = 'all'">All ({{ notifications.length }})</button>
                 <button :class="{ active: notifTab === 'unread' }" @click="notifTab = 'unread'">Unread ({{ unreadCount }})</button>
                 <button :class="{ active: notifTab === 'high' }" @click="notifTab = 'high'">High Risk</button>
+                <button :class="{ active: notifTab === 'sprint' }" @click="notifTab = 'sprint'">Sprints</button>
               </div>
 
               <!-- Notifications List -->
-              <div class="notif-body">
+              <div class="notif-body custom-scroll">
                 <div 
                   v-for="n in filteredNotifications" 
                   :key="n.id" 
@@ -97,10 +105,10 @@
                 >
                   <div class="notif-icon-col">
                     <span class="type-icon-badge" :class="'type--' + n.type">
-                      <svg v-if="n.type === 'risk'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                      <svg v-else-if="n.type === 'sprint'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                      <svg v-else-if="n.type === 'capacity'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                      <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                      <svg v-if="n.type === 'risk'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      <svg v-else-if="n.type === 'sprint'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <svg v-else-if="n.type === 'capacity'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                      <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                     </span>
                   </div>
                   <div class="notif-content-col">
@@ -109,6 +117,10 @@
                       <span class="notif-item-time">{{ formatTimeAgo(n.createdAt) }}</span>
                     </div>
                     <p class="notif-item-desc">{{ n.message }}</p>
+                    <div class="notif-meta-tags">
+                      <span class="priority-tag" :class="'prio--' + n.priority">{{ n.priority.toUpperCase() }}</span>
+                      <span class="type-tag">{{ n.type }}</span>
+                    </div>
                   </div>
                   <div class="notif-action-col">
                     <button v-if="!n.isRead" class="dot-read-btn" @click.stop="markAsRead(n)" title="Mark as Read"></button>
@@ -116,11 +128,14 @@
                 </div>
 
                 <div v-if="!filteredNotifications.length" class="notif-empty">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                  </svg>
-                  <p>No notifications in this tab</p>
+                  <div class="empty-glow-circle">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </div>
+                  <p class="empty-title">All Caught Up!</p>
+                  <p class="empty-desc">No unread alerts in this tab.</p>
                 </div>
               </div>
             </div>
@@ -195,6 +210,26 @@
         </Transition>
       </div>
     </div>
+
+    <!-- Real-Time Floating Glassmorphic Toast Banner -->
+    <Transition name="toast-slide">
+      <div v-if="activeToast.show" class="floating-toast-banner" :class="'toast--' + activeToast.type" @click="handleToastClick">
+        <div class="toast-glow-bar"></div>
+        <div class="toast-body">
+          <div class="toast-badge-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <div class="toast-text-group">
+            <h5 class="toast-title">{{ activeToast.title }}</h5>
+            <p class="toast-message">{{ activeToast.message }}</p>
+          </div>
+          <button class="toast-dismiss-btn" @click.stop="activeToast.show = false">✕</button>
+        </div>
+      </div>
+    </Transition>
   </header>
 </template>
 
@@ -215,13 +250,17 @@ const route = useRoute();
 const isOpen = ref(false);
 const dropdownRef = ref(null);
 
-// Notifications State & Controls
+// Notifications State
 const notifications = ref([]);
 const unreadCount = ref(0);
 const isNotificationsOpen = ref(false);
 const notifTab = ref('all');
 const notifRef = ref(null);
 const isRinging = ref(false);
+let pollingTimer = null;
+
+// Floating Toast Banner State
+const activeToast = ref({ show: false, title: '', message: '', type: 'risk', actionUrl: '' });
 
 const activeRouteLabel = computed(() => {
   const path = route.path;
@@ -249,29 +288,29 @@ const playDingDongChime = () => {
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
 
-    // High Tone ('Ding' - 880Hz A5)
+    // 1st High Tone ('Ding' - 880Hz A5)
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
     osc1.type = 'sine';
     osc1.frequency.setValueAtTime(880, ctx.currentTime);
-    gain1.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.35, ctx.currentTime);
     gain1.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
     osc1.connect(gain1);
     gain1.connect(ctx.destination);
     osc1.start(ctx.currentTime);
     osc1.stop(ctx.currentTime + 0.35);
 
-    // Low Tone ('Dong' - 659.25Hz E5)
+    // 2nd Low Tone ('Dong' - 659.25Hz E5)
     const osc2 = ctx.createOscillator();
     const gain2 = ctx.createGain();
     osc2.type = 'sine';
     osc2.frequency.setValueAtTime(659.25, ctx.currentTime + 0.15);
-    gain2.gain.setValueAtTime(0.35, ctx.currentTime + 0.15);
-    gain2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.7);
+    gain2.gain.setValueAtTime(0.4, ctx.currentTime + 0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.75);
     osc2.connect(gain2);
     gain2.connect(ctx.destination);
     osc2.start(ctx.currentTime + 0.15);
-    osc2.stop(ctx.currentTime + 0.7);
+    osc2.stop(ctx.currentTime + 0.75);
 
     // Trigger visual bell wobble animation
     triggerBellAnimation();
@@ -284,7 +323,22 @@ const triggerBellAnimation = () => {
   isRinging.value = true;
   setTimeout(() => {
     isRinging.value = false;
-  }, 800);
+  }, 850);
+};
+
+const triggerFloatingToast = (title, message, type = 'risk', actionUrl = '') => {
+  activeToast.value = { show: true, title, message, type, actionUrl };
+  playDingDongChime();
+  setTimeout(() => {
+    activeToast.value.show = false;
+  }, 5000);
+};
+
+const handleToastClick = () => {
+  if (activeToast.value.actionUrl) {
+    router.push(activeToast.value.actionUrl);
+  }
+  activeToast.value.show = false;
 };
 
 const fetchNotifications = async () => {
@@ -295,13 +349,35 @@ const fetchNotifications = async () => {
       notifications.value = res.notifications || [];
       unreadCount.value = res.unreadCount || 0;
 
-      // Play chime if new unread notifications arrived
-      if (res.unreadCount > prevUnread && prevUnread > 0) {
-        playDingDongChime();
+      // Play chime and toast if new unread alert arrived dynamically
+      if (res.unreadCount > prevUnread && prevUnread >= 0 && notifications.value.length) {
+        const latest = notifications.value[0];
+        triggerFloatingToast(latest.title, latest.message, latest.type, latest.actionUrl);
       }
     }
   } catch (err) {
     console.warn('Error fetching notifications:', err);
+  }
+};
+
+const triggerSimulatedAlert = async () => {
+  const alertTypes = [
+    { title: 'High Risk Alert: API Rate Limit Warning', message: 'GitHub API quota reached 92% capacity.', type: 'risk', actionUrl: '/risks' },
+    { title: 'Sprint Health Alert: Velocity Drop (-12%)', message: 'DevOps Tasks Sprint 24 health score updated to 78%.', type: 'sprint', actionUrl: '/reports/sprint' },
+    { title: 'Workload Bottleneck: Lead Designer at 125%', message: 'Senior UX designer assigned story points exceed sprint allocation.', type: 'capacity', actionUrl: '/team/utilization' },
+  ];
+  const pick = alertTypes[Math.floor(Math.random() * alertTypes.length)];
+
+  try {
+    const res = await $fetch('/api/notifications', {
+      method: 'POST',
+      body: pick
+    });
+    if (res && res.success) {
+      await fetchNotifications();
+    }
+  } catch (err) {
+    triggerFloatingToast(pick.title, pick.message, pick.type, pick.actionUrl);
   }
 };
 
@@ -349,12 +425,9 @@ const handleNotifClick = (notif) => {
 };
 
 const filteredNotifications = computed(() => {
-  if (notifTab.value === 'unread') {
-    return notifications.value.filter(n => !n.isRead);
-  }
-  if (notifTab.value === 'high') {
-    return notifications.value.filter(n => n.priority === 'high');
-  }
+  if (notifTab.value === 'unread') return notifications.value.filter(n => !n.isRead);
+  if (notifTab.value === 'high') return notifications.value.filter(n => n.priority === 'high');
+  if (notifTab.value === 'sprint') return notifications.value.filter(n => n.type === 'sprint');
   return notifications.value;
 });
 
@@ -368,7 +441,6 @@ const formatTimeAgo = (d) => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
-// Close dropdowns on click outside
 const handleClickOutside = (event) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
     isOpen.value = false;
@@ -381,10 +453,13 @@ const handleClickOutside = (event) => {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
   fetchNotifications();
+  // Live polling every 20 seconds
+  pollingTimer = setInterval(fetchNotifications, 20000);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
+  if (pollingTimer) clearInterval(pollingTimer);
 });
 </script>
 
@@ -442,18 +517,9 @@ onBeforeUnmount(() => {
   font-weight: 500;
 }
 
-.breadcrumb-parent {
-  color: #6B7280;
-}
-
-.breadcrumb-separator {
-  color: #D1D5DB;
-}
-
-.breadcrumb-active {
-  color: #111827;
-  font-weight: 600;
-}
+.breadcrumb-parent { color: #6B7280; }
+.breadcrumb-separator { color: #D1D5DB; }
+.breadcrumb-active { color: #111827; font-weight: 600; }
 
 .topbar__search {
   position: relative;
@@ -502,62 +568,91 @@ onBeforeUnmount(() => {
   position: relative;
   background: none;
   border: none;
-  padding: 0.5rem;
-  border-radius: 8px;
+  padding: 0.55rem;
+  border-radius: 9999px;
   color: #4B5563;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .action-btn:hover {
-  background-color: #F3F4F6;
+  background-color: rgba(5, 150, 105, 0.1);
   color: #059669;
 }
 
-/* Bell Wobble Animation for Ding Dong Chime */
+.action-btn.has-unread {
+  color: #059669;
+}
+
+/* Bell Wobble Animation */
 @keyframes ding-dong-ring {
-  0% { transform: rotate(0); }
-  15% { transform: rotate(15deg); }
-  30% { transform: rotate(-15deg); }
-  45% { transform: rotate(10deg); }
-  60% { transform: rotate(-10deg); }
-  75% { transform: rotate(5deg); }
-  100% { transform: rotate(0); }
+  0% { transform: rotate(0) scale(1); }
+  15% { transform: rotate(18deg) scale(1.1); }
+  30% { transform: rotate(-18deg) scale(1.1); }
+  45% { transform: rotate(12deg) scale(1.05); }
+  60% { transform: rotate(-12deg) scale(1.05); }
+  75% { transform: rotate(6deg) scale(1.02); }
+  100% { transform: rotate(0) scale(1); }
 }
 
 .ding-dong-ring svg {
-  animation: ding-dong-ring 0.75s ease-in-out;
+  animation: ding-dong-ring 0.85s cubic-bezier(0.36, 0.07, 0.19, 0.97);
   color: #059669;
 }
 
-.action-badge-count {
+/* Pulsing Ping Aura Badge */
+.action-badge-container {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 1px;
+  right: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes pulse-ping {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.45); opacity: 0; }
+  100% { transform: scale(0.95); opacity: 0; }
+}
+
+.ping-aura {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
   background-color: #EF4444;
+  animation: pulse-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.action-badge-count {
+  position: relative;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
   color: #ffffff;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 800;
   padding: 1px 5px;
   border-radius: 10px;
   border: 2px solid #ffffff;
   line-height: 1;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
 }
 
-/* Notification Drawer Popover */
-.notif-popover {
+/* Glassmorphic Drawer Popover */
+.notif-popover.glass-card {
   position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
-  width: 360px;
-  max-width: 90vw;
-  background: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
-  border: 1px solid #E5E7EB;
+  top: calc(100% + 14px);
+  right: -10px;
+  width: 380px;
+  max-width: 92vw;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(229, 231, 235, 0.8);
   z-index: 120;
   overflow: hidden;
 }
@@ -566,9 +661,9 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid #F3F4F6;
-  background: #FAFAFA;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.7);
+  background: rgba(249, 250, 251, 0.6);
 }
 
 .notif-title-group {
@@ -578,33 +673,34 @@ onBeforeUnmount(() => {
 }
 
 .notif-heading {
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 800;
   color: #111827;
   margin: 0;
+  letter-spacing: -0.01em;
 }
 
 .unread-pill {
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.68rem;
+  font-weight: 800;
   color: #047857;
-  background: #D1FAE5;
-  padding: 2px 6px;
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  padding: 2px 7px;
   border-radius: 10px;
 }
 
 .notif-header-actions {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .chime-test-btn {
   display: flex;
   align-items: center;
-  gap: 3px;
-  background: #F3F4F6;
-  border: none;
+  gap: 4px;
+  background: rgba(243, 244, 246, 0.8);
+  border: 1px solid #E5E7EB;
   border-radius: 6px;
   padding: 4px 8px;
   font-size: 0.72rem;
@@ -615,17 +711,19 @@ onBeforeUnmount(() => {
 }
 
 .chime-test-btn:hover {
-  background: #E5E7EB;
-  color: #059669;
+  background: #ECFDF5;
+  border-color: #A7F3D0;
+  color: #047857;
 }
 
 .mark-all-btn {
   background: none;
   border: none;
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #059669;
   cursor: pointer;
+  padding: 4px;
 }
 
 .mark-all-btn:hover {
@@ -635,31 +733,32 @@ onBeforeUnmount(() => {
 .notif-tabs {
   display: flex;
   gap: 0.25rem;
-  padding: 0.4rem 0.75rem;
-  border-bottom: 1px solid #F3F4F6;
-  background: #ffffff;
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid rgba(243, 244, 246, 0.8);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .notif-tabs button {
   flex: 1;
   background: none;
   border: none;
-  padding: 0.4rem 0.25rem;
+  padding: 0.4rem 0.2rem;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #6B7280;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .notif-tabs button.active {
-  background: #ECFDF5;
+  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
   color: #047857;
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);
 }
 
 .notif-body {
-  max-height: 360px;
+  max-height: 380px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -667,37 +766,38 @@ onBeforeUnmount(() => {
 
 .notif-item {
   display: flex;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #F3F4F6;
+  gap: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid rgba(243, 244, 246, 0.7);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.2s ease;
   position: relative;
 }
 
 .notif-item:hover {
-  background: #F9FAFB;
+  background: rgba(249, 250, 251, 0.9);
 }
 
 .notif-item--unread {
-  background: #F0FDF4;
+  background: linear-gradient(90deg, rgba(236, 253, 245, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
 }
 
 .type-icon-badge {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.type--risk { background: #FEE2E2; color: #EF4444; }
-.type--sprint { background: #D1FAE5; color: #059669; }
-.type--capacity { background: #FEF3C7; color: #D97706; }
-.type--kpi { background: #E0E7FF; color: #4F46E5; }
-.type--system { background: #F3F4F6; color: #6B7280; }
+.type--risk { background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); color: #EF4444; }
+.type--sprint { background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); color: #059669; }
+.type--capacity { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #D97706; }
+.type--kpi { background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%); color: #4F46E5; }
+.type--system { background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%); color: #4B5563; }
 
 .notif-content-col {
   flex: 1;
@@ -712,27 +812,53 @@ onBeforeUnmount(() => {
 }
 
 .notif-item-title {
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: 0.84rem;
+  font-weight: 800;
   color: #111827;
   line-height: 1.3;
 }
 
 .notif-item-time {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 600;
   color: #9CA3AF;
   white-space: nowrap;
 }
 
 .notif-item-desc {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: #4B5563;
-  margin: 2px 0 0 0;
+  margin: 3px 0 6px 0;
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.notif-meta-tags {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.priority-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+
+.prio--high { background: #FEE2E2; color: #DC2626; }
+.prio--medium { background: #FEF3C7; color: #D97706; }
+.prio--low { background: #E0E7FF; color: #4338CA; }
+
+.type-tag {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: capitalize;
 }
 
 .notif-action-col {
@@ -741,23 +867,140 @@ onBeforeUnmount(() => {
 }
 
 .dot-read-btn {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background-color: #059669;
-  border: none;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.4);
   cursor: pointer;
 }
 
 .notif-empty {
-  padding: 2.5rem 1rem;
+  padding: 3rem 1.5rem;
   text-align: center;
-  color: #9CA3AF;
-  font-size: 0.85rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+}
+
+.empty-glow-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #ECFDF5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+}
+
+.empty-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.empty-desc {
+  font-size: 0.78rem;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* Floating Real-Time Toast Banner */
+.floating-toast-banner {
+  position: fixed;
+  top: 76px;
+  right: 20px;
+  width: 340px;
+  max-width: calc(100vw - 40px);
+  background: rgba(17, 24, 39, 0.94);
+  backdrop-filter: blur(16px);
+  color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  z-index: 999;
+  cursor: pointer;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.toast-glow-bar {
+  height: 3px;
+  background: linear-gradient(90deg, #EF4444 0%, #10B981 50%, #6366F1 100%);
+}
+
+.toast-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+}
+
+.toast-badge-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-text-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  margin: 0 0 2px 0;
+  color: #ffffff;
+}
+
+.toast-message {
+  font-size: 0.76rem;
+  color: #D1D5DB;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.toast-dismiss-btn {
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.toast-dismiss-btn:hover {
+  color: #ffffff;
+}
+
+/* Animations & Transitions */
+.glass-pop-enter-active, .glass-pop-leave-active {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+.glass-pop-enter-from, .glass-pop-leave-to {
+  transform: translateY(-8px) scale(0.96);
+  opacity: 0;
+}
+
+.toast-slide-enter-active, .toast-slide-leave-active {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+}
+
+.toast-slide-enter-from, .toast-slide-leave-to {
+  transform: translateX(40px);
+  opacity: 0;
 }
 
 .topbar__divider {
@@ -908,7 +1151,6 @@ onBeforeUnmount(() => {
   color: #DC2626;
 }
 
-/* Transitions */
 .slide-up-enter-active,
 .slide-up-leave-active {
   transition: transform 0.15s ease, opacity 0.15s ease;
