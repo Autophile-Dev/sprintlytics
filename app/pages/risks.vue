@@ -1323,4 +1323,18 @@ onMounted(() => {
 .form-label { font-size: 0.78rem; font-weight: 600; color: #374151; }
 .modal-input { padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid #D1D5DB; font-size: 0.85rem; outline: none; }
 .modal-actions-row { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem; }
+
+/* Mobile Responsiveness Media Queries */
+@media (max-width: 768px) {
+  .va-topbar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .topbar-controls { width: 100%; flex-wrap: wrap; }
+  .exec-grid { grid-template-columns: 1fr; }
+  .matrix-2x2-grid { grid-template-columns: 1fr; }
+  .rm-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .action-btn-group { flex-direction: column; width: 100%; }
+  .btn-detail { width: 100%; justify-content: center; }
+}
 </style>

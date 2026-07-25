@@ -1048,6 +1048,21 @@ const sendEmailReport = async () => {
 .margin-bottom-sm { margin-bottom: 0.75rem; }
 .pad-lg { padding: 2rem !important; }
 
+/* ── Mobile & Screen Responsiveness Media Queries ── */
+@media (max-width: 768px) {
+  .va-topbar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .topbar-controls { width: 100%; flex-wrap: wrap; }
+  .exec-grid { grid-template-columns: 1fr; }
+  .metrics-four-grid { grid-template-columns: repeat(2, 1fr); }
+  .workload-two-grid { grid-template-columns: 1fr; }
+  .modal-box { width: 94%; padding: 1rem; }
+}
+
+@media (max-width: 480px) {
+  .metrics-four-grid { grid-template-columns: 1fr; }
+  .action-btn { width: 100%; justify-content: center; }
+}
+
 /* ── Print Media Query ── */
 @media print {
   .no-print { display: none !important; }

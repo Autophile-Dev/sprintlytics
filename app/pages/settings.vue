@@ -792,5 +792,9 @@ input:checked + .slider:before { transform: translateX(20px); }
   .form-grid { grid-template-columns: 1fr; }
   .span-full { grid-column: span 1; }
   .settings-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .settings-tabs-nav { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.75rem; -webkit-overflow-scrolling: touch; }
+  .tab-btn { flex-shrink: 0; }
+  .toggle-item { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .save-main-btn { width: 100%; justify-content: center; }
 }
 </style>

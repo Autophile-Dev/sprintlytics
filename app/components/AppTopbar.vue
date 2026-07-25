@@ -1430,4 +1430,45 @@ onBeforeUnmount(() => {
   transform: translateY(8px);
   opacity: 0;
 }
+
+@media (max-width: 640px) {
+  .topbar {
+    padding: 0 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .breadcrumb-parent, .breadcrumb-separator {
+    display: none !important;
+  }
+
+  .search-input {
+    width: 130px;
+    padding-right: 1rem;
+  }
+
+  .search-input:focus {
+    width: 180px;
+  }
+
+  .search-kbd-badge {
+    display: none;
+  }
+
+  .user-meta {
+    display: none !important;
+  }
+
+  .search-dropdown-card {
+    width: 92vw;
+    position: fixed;
+    left: 4vw;
+    right: 4vw;
+    top: 68px;
+  }
+
+  .notif-popover.glass-card {
+    width: 94vw;
+    right: -10px;
+  }
+}
 </style>

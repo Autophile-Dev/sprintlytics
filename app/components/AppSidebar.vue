@@ -441,4 +441,19 @@ const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
 }
 .label-fade-enter-from { opacity: 0; transform: translateX(-6px); }
 .label-fade-leave-to  { opacity: 0; transform: translateX(-6px); }
+
+/* Mobile Off-Canvas Drawer Responsiveness */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 260px !important;
+    transform: translateX(-100%);
+    z-index: 200;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar:not(.sidebar--collapsed) {
+    transform: translateX(0);
+  }
+}
 </style>

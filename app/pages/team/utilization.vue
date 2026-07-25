@@ -2399,4 +2399,16 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
 
 .empty-state h2 { font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0; }
 .empty-state p { font-size: 0.85rem; color: #6B7280; margin: 0; }
+
+/* Mobile Responsiveness Media Queries */
+@media (max-width: 768px) {
+  .va-topbar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .topbar-controls { width: 100%; flex-wrap: wrap; }
+  .util-cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .modal-box { width: 94%; padding: 1rem; }
+}
+
+@media (max-width: 480px) {
+  .util-cards-grid { grid-template-columns: 1fr; }
+}
 </style>

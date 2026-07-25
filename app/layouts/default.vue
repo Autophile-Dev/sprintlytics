@@ -3,6 +3,13 @@
     <AppLoader v-if="loading" />
 
     <template v-else-if="user">
+      <!-- Mobile Backdrop Overlay -->
+      <div 
+        v-if="!isCollapsed" 
+        class="mobile-backdrop" 
+        @click="isCollapsed = true"
+      ></div>
+
       <!-- Sidebar -->
       <AppSidebar :user="user" :riskCount="0" @logout="confirmLogout" />
 
@@ -110,11 +117,39 @@ const handleLogout = async () => {
   overflow-x: hidden;
 }
 
-
+.mobile-backdrop {
+  display: none;
+}
 
 @media (max-width: 768px) {
+  .app-layout {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
   .main-container {
     margin-left: 0 !important;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .page-content {
+    padding: 1rem 0.85rem 2rem 0.85rem;
+    overflow-y: visible;
+  }
+
+  .mobile-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(17, 24, 39, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 180;
   }
 }
 </style>

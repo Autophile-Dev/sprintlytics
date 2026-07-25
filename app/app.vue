@@ -46,13 +46,13 @@ html, body, #__nuxt {
   padding: 0 !important;
   background-color: #F9FAFB;
   font-family: 'Open Sans', sans-serif;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .app-root {
-  height: 100%;
+  min-height: 100%;
   width: 100%;
 }
 </style>

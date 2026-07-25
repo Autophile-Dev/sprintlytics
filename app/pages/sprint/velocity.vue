@@ -2941,4 +2941,19 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: '
 
 .toast-fade-enter-active, .toast-fade-leave-active { transition: all 0.3s ease; }
 .toast-fade-enter-from, .toast-fade-leave-to { opacity: 0; transform: translateY(10px); }
+
+/* Mobile Responsiveness Media Queries */
+@media (max-width: 768px) {
+  .va-topbar { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .topbar-controls { width: 100%; flex-wrap: wrap; }
+  .kpi-row-five { grid-template-columns: repeat(2, 1fr); }
+  .sp-breakdown-row { grid-template-columns: repeat(2, 1fr); }
+  .team-cards-grid { grid-template-columns: 1fr; }
+  .modal-card-custom { width: 94%; padding: 1rem; }
+}
+
+@media (max-width: 480px) {
+  .kpi-row-five { grid-template-columns: 1fr; }
+  .sp-breakdown-row { grid-template-columns: 1fr; }
+}
 </style>
