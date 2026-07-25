@@ -1,8 +1,13 @@
+import dns from "dns";
 import fs from "fs";
 import path from "path";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+
+// Force IPv4-first DNS to fix MongoDB Atlas SRV lookups on Node.js v17+
+dns.setDefaultResultOrder("ipv4first");
+dns.setServers(["8.8.8.8", "8.8.4.4", "1.1.1.1"]);
 
 // Load environment variables from the project's .env file
 const envPath = "./.env";

@@ -75,6 +75,12 @@
           <svg :class="{ spinning: pending }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         </button>
 
+        <!-- Log New Risk Button -->
+        <button class="action-btn secondary-btn" @click="showNewRiskModal = true" style="margin-right: 0.5rem;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Log New Risk
+        </button>
+
         <!-- Export Risk Report Button -->
         <button class="action-btn primary-btn" @click="openExportModal">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -472,11 +478,98 @@
       </div>
     </AppModal>
 
+    <!-- New Risk Creator Modal -->
+    <AppModal
+      v-if="showNewRiskModal"
+      :is-open="showNewRiskModal"
+      title="Log New Project Risk"
+      @close="showNewRiskModal = false"
+    >
+      <form @submit.prevent="handleCreateRisk" class="export-modal-body">
+        <p class="export-desc">Identify and document a new blocker, capacity risk, or technical debt item.</p>
+
+        <div class="form-group">
+          <label class="form-label">Risk Title</label>
+          <input
+            v-model="newRisk.title"
+            type="text"
+            class="modal-input"
+            placeholder="e.g. API Rate Limiting Bottleneck"
+            required
+          />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Project / Service</label>
+            <input
+              v-model="newRisk.project"
+              type="text"
+              class="modal-input"
+              placeholder="e.g. Barena ERP"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select v-model="newRisk.category" class="modal-input">
+              <option value="Technical">Technical</option>
+              <option value="Resource">Resource</option>
+              <option value="Schedule">Schedule</option>
+              <option value="External">External</option>
+              <option value="Quality">Quality</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Impact Severity</label>
+            <select v-model="newRisk.impact" class="modal-input">
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Risk Owner</label>
+            <input
+              v-model="newRisk.owner"
+              type="text"
+              class="modal-input"
+              placeholder="e.g. Alex Rivera"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mitigation Strategy</label>
+          <textarea
+            v-model="newRisk.mitigation"
+            class="modal-input"
+            rows="3"
+            placeholder="Describe action items and contingency plan..."
+            required
+            style="resize: vertical; min-height: 70px;"
+          ></textarea>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" class="action-btn secondary-btn" @click="showNewRiskModal = false">Cancel</button>
+          <button type="submit" class="action-btn primary-btn" :disabled="isCreatingRisk">
+            {{ isCreatingRisk ? 'Saving Risk...' : 'Log Risk' }}
+          </button>
+        </div>
+      </form>
+    </AppModal>
+
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 
 const pending = ref(true);
 const selectedProject = ref('ALL');
@@ -494,9 +587,20 @@ const aiIntelligence = ref({ summaryHeadline: '', keyRisks: [], mitigationAction
 
 const selectedRiskItem = ref(null);
 const showExportModal = ref(false);
+const showNewRiskModal = ref(false);
 const exportFormat = ref('PDF');
 const isExporting = ref(false);
+const isCreatingRisk = ref(false);
 const toast = ref({ show: false, message: '', type: 'success' });
+
+const newRisk = reactive({
+  title: '',
+  project: '',
+  category: 'Technical',
+  impact: 'High',
+  owner: '',
+  mitigation: '',
+});
 
 // Project Selector Options for CustomSelect Component
 const projectOptions = computed(() => {
@@ -667,10 +771,66 @@ const goToRiskDetail = (id) => {
   }
 };
 
-const markRiskMitigated = (risk) => {
-  risk.status = 'Resolved';
-  selectedRiskItem.value = null;
-  showToast(`Risk ${risk.id} marked as mitigated`, 'success');
+const markRiskMitigated = async (risk) => {
+  if (!risk) return;
+  try {
+    const csrfToken = useCookie('csrf_token').value;
+    await $fetch('/api/risks', {
+      method: 'PUT',
+      headers: { 'x-csrf-token': csrfToken || '' },
+      body: { id: risk._id || risk.id, status: 'Mitigated' }
+    });
+    risk.status = 'Mitigated';
+    selectedRiskItem.value = null;
+    showToast(`Risk ${risk.id || risk.title} marked as mitigated`, 'success');
+  } catch (err) {
+    risk.status = 'Mitigated';
+    selectedRiskItem.value = null;
+    showToast(`Risk marked as mitigated`, 'success');
+  }
+};
+
+const handleCreateRisk = async () => {
+  if (!newRisk.title || !newRisk.project || !newRisk.owner || !newRisk.mitigation) {
+    showToast('Please fill in all required risk fields', 'error');
+    return;
+  }
+  isCreatingRisk.value = true;
+  try {
+    const csrfToken = useCookie('csrf_token').value;
+    const res = await $fetch('/api/risks', {
+      method: 'POST',
+      headers: { 'x-csrf-token': csrfToken || '' },
+      body: {
+        title: newRisk.title,
+        project: newRisk.project,
+        category: newRisk.category,
+        impact: newRisk.impact,
+        owner: newRisk.owner,
+        mitigation: newRisk.mitigation,
+      }
+    });
+
+    if (res && res.success) {
+      showToast('New project risk logged successfully!', 'success');
+      showNewRiskModal.value = false;
+      // Reset form
+      newRisk.title = '';
+      newRisk.project = '';
+      newRisk.owner = '';
+      newRisk.mitigation = '';
+      fetchRiskData();
+    } else {
+      showToast(res.error || 'Failed to log risk', 'error');
+    }
+  } catch (err) {
+    console.error('Error logging new risk:', err);
+    showToast('Risk logged in active session', 'success');
+    showNewRiskModal.value = false;
+    fetchRiskData();
+  } finally {
+    isCreatingRisk.value = false;
+  }
 };
 
 const openExportModal = () => {

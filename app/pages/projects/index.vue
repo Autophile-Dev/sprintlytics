@@ -1,10 +1,18 @@
 <template>
   <div class="projects-overview-container">
     <header class="page-header">
-      <div>
+      <div class="header-text">
         <h1 class="page-title">Company Projects & Analytics</h1>
         <p class="page-subtitle">Select a project to view detailed performance metrics, velocity, and AI risk reports.</p>
       </div>
+
+      <button class="add-project-btn" @click="showAddModal = true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>Add New Project</span>
+      </button>
     </header>
 
     <div v-if="pending" class="loading-box">
@@ -49,18 +57,78 @@
         </div>
       </div>
     </div>
+
+    <!-- Create Project Modal -->
+    <AppModal
+      v-if="showAddModal"
+      :is-open="showAddModal"
+      title="Create New Project"
+      @close="showAddModal = false"
+    >
+      <form @submit.prevent="handleCreateProject" class="modal-form">
+        <p class="modal-desc">Add a new company project portfolio to track sprint velocity and health metrics.</p>
+
+        <div class="form-group">
+          <label class="form-label">Project Name</label>
+          <input
+            v-model="newProj.name"
+            type="text"
+            class="modal-input"
+            placeholder="e.g. NextGen Payment Gateway"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Company / Client Name</label>
+          <input
+            v-model="newProj.company"
+            type="text"
+            class="modal-input"
+            placeholder="e.g. Apex Dynamics"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Project Lead / Manager</label>
+          <input
+            v-model="newProj.lead"
+            type="text"
+            class="modal-input"
+            placeholder="e.g. Sarah Jenkins"
+            required
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" @click="showAddModal = false">Cancel</button>
+          <button type="submit" class="btn-primary" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Creating...' : 'Create Project' }}
+          </button>
+        </div>
+      </form>
+    </AppModal>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 useHead({ title: 'Company Projects Overview | Sprintlytics' });
 
 const router = useRouter();
+const { data, pending, refresh } = await useFetch('/api/projects/by-company');
 
-const { data, pending } = await useFetch('/api/projects/by-company');
+const showAddModal = ref(false);
+const isSubmitting = ref(false);
+
+const newProj = reactive({
+  name: '',
+  company: '',
+  lead: ''
+});
 
 const companyList = computed(() => {
   if (!data.value || !data.value.data) return [];
@@ -77,6 +145,36 @@ const getInitials = (name) => {
 const navigateToCompany = (name) => {
   router.push(`/projects/${encodeURIComponent(name)}`);
 };
+
+const handleCreateProject = async () => {
+  if (!newProj.name || !newProj.company || !newProj.lead) return;
+  isSubmitting.value = true;
+  try {
+    const csrfToken = useCookie('csrf_token').value;
+    const res = await $fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'x-csrf-token': csrfToken || '' },
+      body: {
+        name: newProj.name,
+        company: newProj.company,
+        lead: newProj.lead
+      }
+    });
+
+    if (res && res.success) {
+      showAddModal.value = false;
+      newProj.name = '';
+      newProj.company = '';
+      newProj.lead = '';
+      refresh();
+    }
+  } catch (err) {
+    console.error('Error creating project:', err);
+    showAddModal.value = false;
+  } finally {
+    isSubmitting.value = false;
+  }
+};
 </script>
 
 <style scoped>
@@ -88,6 +186,9 @@ const navigateToCompany = (name) => {
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   border-bottom: 1px solid #E5E7EB;
   padding-bottom: 1.25rem;
 }
@@ -104,6 +205,25 @@ const navigateToCompany = (name) => {
   font-size: 0.9rem;
   color: #6B7280;
   margin: 0.25rem 0 0;
+}
+
+.add-project-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  background: #059669;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.add-project-btn:hover {
+  background: #047857;
 }
 
 .loading-box {
@@ -212,11 +332,75 @@ const navigateToCompany = (name) => {
   text-decoration: none;
 }
 
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-desc {
+  font-size: 0.85rem;
+  color: #6B7280;
+  margin-bottom: 0.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.modal-input {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.modal-input:focus {
+  border-color: #059669;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn-secondary {
+  padding: 0.6rem 1rem;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-primary {
+  padding: 0.6rem 1.1rem;
+  background: #059669;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 @media (max-width: 1024px) {
   .company-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 640px) {
   .company-grid { grid-template-columns: 1fr; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
 }
 </style>
