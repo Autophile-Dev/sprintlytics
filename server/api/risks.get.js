@@ -5,12 +5,14 @@ export default defineEventHandler(async (event) => {
   try {
     await connectDB();
     const query = getQuery(event);
+    
     const period = (query.period || 'daily').toLowerCase();
     const selectedProject = query.project || 'ALL';
+    
     const selectedSeverity = query.severity || 'ALL';
     const range = parseInt(query.range || '10', 10);
 
-    // 1. Fetch distinct projects list from DB
+
     const rawCompanies = await ProjectPerformance.distinct('companyName', {
       companyName: { $exists: true, $ne: '' }
     });
